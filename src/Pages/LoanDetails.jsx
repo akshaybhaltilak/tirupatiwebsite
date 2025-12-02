@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Download,
@@ -37,14 +37,84 @@ import {
 import jsPDF from 'jspdf';
 import loanDetails from '../data/loanDetails.json';
 
+// Preload images function
+const preloadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src;
+    img.onload = resolve;
+    img.onerror = reject;
+  });
+};
+
 function LoanDetails() {
   const { loanId } = useParams();
   const [activeTab, setActiveTab] = useState('overview');
   const [applicantType, setApplicantType] = useState('salaried');
   const [selectedSubtype, setSelectedSubtype] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const service = loanDetails[loanId];
   const pageRef = useRef();
+
+  // Optimized image mapping with smaller, optimized images
+  const imageMap = useMemo(() => ({
+    // FLAT PURCHASE - Optimized with lower q parameter
+    'flat-purchase': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'flat': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'apartment': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // HOUSE PURCHASE
+    'house-purchase': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'house': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // CONSTRUCTION LOAN
+    'construction-loan': "https://homefirstindia.com/app/uploads/2020/09/construction-2.jpg",
+    'construction': "https://homefirstindia.com/app/uploads/2020/09/construction-2.jpg",
+    
+    // PLOT PURCHASE
+    'plot-purchase': "https://images.unsplash.com/photo-1448630360428-65456885c650?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'land': "https://images.unsplash.com/photo-1448630360428-65456885c650?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // RENOVATION LOAN
+    'renovation': "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'renovation-loan': "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // EDUCATION
+    'education': "https://www.i2ifunding.com/assets/bank-education-loan.jpg",
+    'education-loan': "https://www.i2ifunding.com/assets/bank-education-loan.jpg",
+    
+    // BUSINESS
+    'business': "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'business-loan': "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // MEDICAL
+    'doctor': "https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'medical': "https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // EQUIPMENT
+    'machine': "https://images.unsplash.com/photo-1494412685616-a5d310fbb07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'equipment': "https://images.unsplash.com/photo-1494412685616-a5d310fbb07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // LOAN AGAINST PROPERTY
+    'loan-against-property': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'lap': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // MORTGAGE
+    'mortgage': "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'registration': "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // PERSONAL LOAN
+    'personal': "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'personal-loan': "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // SERVICES
+    'service': "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    
+    // DEFAULT
+    'default': "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70"
+  }), []);
 
   // Check mobile on mount and resize
   useEffect(() => {
@@ -58,86 +128,13 @@ function LoanDetails() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Enhanced image mapping with better images for all services
-  const getLoanImage = () => {
-    const serviceId = service?.id?.toLowerCase() || '';
-    const serviceName = service?.name?.toLowerCase() || '';
+  // Get loan image with memoization
+  const loanImage = useMemo(() => {
+    if (!service) return '';
+    
+    const serviceId = service.id.toLowerCase();
+    const serviceName = service.name.toLowerCase();
 
-    // Professional, high-quality Unsplash images for each service category
- const imageMap = {
-    // FLAT PURCHASE - Unique image
-    'flat-purchase': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'flat': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'apartment': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // HOUSE PURCHASE - Unique image (different from flat)
-    'house-purchase': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'house': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'home': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // CONSTRUCTION LOAN - Unique image (construction site)
-    'construction-loan': "https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'construction': "https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'build': "https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'building': "https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // PLOT PURCHASE - Land/Plot specific image
-    'plot-purchase': "https://images.unsplash.com/photo-1448630360428-65456885c650?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'land': "https://images.unsplash.com/photo-1448630360428-65456885c650?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'plot': "https://images.unsplash.com/photo-1448630360428-65456885c650?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // RENOVATION LOAN - Home renovation/improvement image
-    'renovation': "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'renovation-loan': "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'home-improvement': "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // Education
-    'education': "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'education-loan': "https://images.unsplash.com/photo-1524178234883-043d5c3f3cf4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'student': "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // Business
-    'business': "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'business-loan': "https://images.unsplash.com/photo-1551836026-d5c2e0c49b61?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'project-loan': "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'commercial': "https://images.unsplash.com/photo-1551836026-d5c2e0c49b61?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // Medical & Professional
-    'doctor': "https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'medical': "https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'profession': "https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // Equipment & Machinery
-    'machine': "https://images.unsplash.com/photo-1494412685616-a5d310fbb07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'equipment': "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'machinery': "https://images.unsplash.com/photo-1494412685616-a5d310fbb07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'vehicle': "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // Loan Against Property
-    'loan-against-property': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'lap': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'property-loan': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // Mortgage Services
-    'mortgage': "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'registration': "https://images.unsplash.com/photo-1592286920753-63c01c89e366?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'documentation': "https://images.unsplash.com/photo-1592286920753-63c01c89e366?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'legal': "https://images.unsplash.com/photo-1592286920753-63c01c89e366?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // Personal & Other Loans
-    'personal': "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'personal-loan': "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'consumer': "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // Services
-    'service': "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'consultation': "https://images.unsplash.com/photo-1551836026-d5c2e0c49b61?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'advice': "https://images.unsplash.com/photo-1551836026-d5c2e0c49b61?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    
-    // Default fallback
-    'default': "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    'loan': "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
-  };
     // Try to match by service ID first
     for (const [key, image] of Object.entries(imageMap)) {
       if (serviceId.includes(key)) return image;
@@ -149,14 +146,23 @@ function LoanDetails() {
     }
 
     // Fallback based on category
-    if (service?.category === 'loan') return imageMap['loan'];
-    if (service?.category === 'mortgage') return imageMap['mortgage'];
-    if (service?.category === 'service') return imageMap['service'];
+    if (service.category === 'loan') return imageMap['default'];
+    if (service.category === 'mortgage') return imageMap['mortgage'];
+    if (service.category === 'service') return imageMap['service'];
 
     return imageMap['default'];
-  };
+  }, [service, imageMap]);
 
-  const getIconComponent = (iconName) => {
+  // Preload image on component mount
+  useEffect(() => {
+    if (loanImage) {
+      preloadImage(loanImage)
+        .then(() => setImageLoaded(true))
+        .catch(() => setImageLoaded(true)); // Even if error, mark as loaded to show fallback
+    }
+  }, [loanImage]);
+
+  const getIconComponent = useCallback((iconName) => {
     const iconComponents = {
       Home, Building, GraduationCap, Briefcase, Settings, User,
       FileSearch, BarChart, FileCheck, Building2, School,
@@ -164,10 +170,9 @@ function LoanDetails() {
       Banknote, TrendingUp, Clock, Percent, Shield, Users, Zap
     };
     return iconComponents[iconName] || FileText;
-  };
+  }, []);
 
   const IconComponent = service ? getIconComponent(service.icon) : FileText;
-  const loanImage = service ? getLoanImage() : '';
 
   if (!service) {
     return (
@@ -190,32 +195,60 @@ function LoanDetails() {
     );
   }
 
-  // Share function
-  const handleShare = async () => {
+  // Optimized Share function
+  const handleShare = useCallback(async () => {
     const shareData = {
       title: `${service.name} - Tirupati Agencies`,
       text: `Check out ${service.name} from Tirupati Agencies`,
       url: window.location.href,
     };
 
-    if (navigator.share) {
+    if (navigator.share && navigator.canShare?.(shareData)) {
       try {
         await navigator.share(shareData);
       } catch (err) {
-        console.log('Share cancelled or failed:', err);
+        if (err.name !== 'AbortError') {
+          fallbackShare();
+        }
       }
     } else {
-      try {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
-      } catch (err) {
-        prompt('Copy this link:', window.location.href);
-      }
+      fallbackShare();
+    }
+  }, [service]);
+
+  const fallbackShare = () => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => {
+          alert('Link copied to clipboard!');
+        })
+        .catch(() => {
+          prompt('Copy this link:', window.location.href);
+        });
+    } else {
+      prompt('Copy this link:', window.location.href);
     }
   };
 
-  // PDF Generation function
-  const handleDownloadPDF = () => {
+  // Optimized PDF Generation
+  const handleDownloadPDF = useCallback(async () => {
+    setPdfLoading(true);
+    
+    // Use requestIdleCallback for non-blocking PDF generation
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        generatePDF();
+        setPdfLoading(false);
+      }, { timeout: 2000 });
+    } else {
+      setTimeout(() => {
+        generatePDF();
+        setPdfLoading(false);
+      }, 0);
+    }
+  }, [service]);
+
+  const generatePDF = () => {
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const margin = 40;
     let y = 60;
@@ -255,8 +288,9 @@ function LoanDetails() {
     // Description
     doc.setFontSize(11);
     doc.setTextColor(66, 66, 66);
-    doc.text(service.description, margin, y, { maxWidth: 500 });
-    y += 50;
+    const descriptionLines = doc.splitTextToSize(service.description, 500);
+    doc.text(descriptionLines, margin, y);
+    y += descriptionLines.length * 15 + 20;
 
     // Key details section
     doc.setFontSize(12);
@@ -265,21 +299,26 @@ function LoanDetails() {
     doc.text('Key Details:', margin, y);
     y += 20;
 
-    // Add key details (you can customize this based on your data)
+    // Add key details
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.text(`• Category: ${service.category}`, margin + 10, y);
     y += 15;
+    
     if (service.maxAmount) {
       doc.text(`• Maximum Amount: ${service.maxAmount}`, margin + 10, y);
       y += 15;
     }
+    
     if (service.tenure) {
       doc.text(`• Tenure: ${service.tenure}`, margin + 10, y);
       y += 15;
     }
-
-    // Add more details as needed...
+    
+    if (service.interest) {
+      doc.text(`• Interest Rate: ${service.interest}`, margin + 10, y);
+      y += 15;
+    }
 
     // Footer
     const pageHeight = doc.internal.pageSize.height;
@@ -291,8 +330,10 @@ function LoanDetails() {
     doc.save(`${filenameSafe}_tirupati_agencies.pdf`);
   };
 
-  // Render documents with improved mobile layout
-  const renderDocuments = () => {
+  // Memoized renderDocuments function
+  const renderDocuments = useMemo(() => {
+    if (!service) return null;
+
     if (service.category === 'service') {
       return (
         <div className="space-y-3">
@@ -390,18 +431,59 @@ function LoanDetails() {
         )}
       </div>
     );
-  };
+  }, [service, applicantType, selectedSubtype]);
+
+  // Memoized quick stats
+  const quickStats = useMemo(() => [
+    { 
+      title: "Amount", 
+      value: service.maxAmount || 'Custom', 
+      icon: Banknote,
+      color: "from-orange-500 to-amber-500"
+    },
+    { 
+      title: "Interest", 
+      value: service.interest || 'From 8.5%', 
+      icon: Percent,
+      color: "from-blue-500 to-cyan-500"
+    },
+    { 
+      title: "Tenure", 
+      value: service.tenure || 'Flexible', 
+      icon: Clock,
+      color: "from-green-500 to-emerald-500"
+    },
+    { 
+      title: "Processing", 
+      value: service.duration || 'Quick', 
+      icon: Zap,
+      color: "from-purple-500 to-pink-500"
+    }
+  ], [service]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section */}
+      {/* Hero Section with optimized image loading */}
       <div className="relative h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96 overflow-hidden">
+        {/* Gradient fallback while image loads */}
+        <div 
+          className={`absolute inset-0 bg-gradient-to-r from-orange-500 to-amber-500 transition-opacity duration-500 ${
+            imageLoaded ? 'opacity-0' : 'opacity-100'
+          }`}
+        />
+        
+        {/* Optimized image with lazy loading */}
         <img
           src={loanImage}
           alt={service.name}
-          className="w-full h-full object-cover transform scale-105"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           loading="eager"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageLoaded(true)} // Fallback to gradient
         />
+        
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
         
@@ -440,6 +522,7 @@ function LoanDetails() {
         <button
           onClick={() => window.history.back()}
           className="absolute top-4 left-4 flex items-center gap-2 px-3 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition sm:top-6 sm:left-6 sm:px-4"
+          aria-label="Go back"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           <span className="hidden sm:inline text-sm">Back</span>
@@ -451,16 +534,25 @@ function LoanDetails() {
             onClick={handleShare}
             className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition"
             title="Share"
+            aria-label="Share this service"
           >
             <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           <button
             onClick={handleDownloadPDF}
-            className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:shadow-lg transition"
+            disabled={pdfLoading}
+            className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:shadow-lg transition ${
+              pdfLoading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
             title="Download PDF"
+            aria-label="Download PDF document"
           >
-            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+            {pdfLoading ? (
+              <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
           </button>
         </div>
       </div>
@@ -472,37 +564,21 @@ function LoanDetails() {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
             {/* Quick Stats Card - Mobile Optimized */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-              <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl p-4 text-white shadow-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Banknote className="w-4 h-4" />
-                  <span className="text-xs sm:text-sm font-medium">Amount</span>
-                </div>
-                <div className="text-lg sm:text-xl font-bold">{service.maxAmount || 'Custom'}</div>
-              </div>
-              
-              <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl p-4 text-white shadow-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Percent className="w-4 h-4" />
-                  <span className="text-xs sm:text-sm font-medium">Interest</span>
-                </div>
-                <div className="text-lg sm:text-xl font-bold">{service.interest || 'From 8.5%'}</div>
-              </div>
-              
-              <div className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl p-4 text-white shadow-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-xs sm:text-sm font-medium">Tenure</span>
-                </div>
-                <div className="text-lg sm:text-xl font-bold">{service.tenure || 'Flexible'}</div>
-              </div>
-              
-              <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl p-4 text-white shadow-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="w-4 h-4" />
-                  <span className="text-xs sm:text-sm font-medium">Processing</span>
-                </div>
-                <div className="text-lg sm:text-xl font-bold">{service.duration || 'Quick'}</div>
-              </div>
+              {quickStats.map((stat, index) => {
+                const Icon = stat.icon;
+                return (
+                  <div 
+                    key={index}
+                    className={`bg-gradient-to-br ${stat.color} rounded-xl p-4 text-white shadow-lg`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon className="w-4 h-4" />
+                      <span className="text-xs sm:text-sm font-medium">{stat.title}</span>
+                    </div>
+                    <div className="text-lg sm:text-xl font-bold">{stat.value}</div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Overview Card */}
@@ -520,19 +596,21 @@ function LoanDetails() {
               <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-6">{service.description}</p>
 
               {/* Key Benefits in Grid */}
-              <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-                {service.benefits?.slice(0, 4).map((benefit, idx) => (
-                  <div key={idx} className="flex items-start gap-3 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg sm:rounded-xl border border-gray-100">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+              {service.benefits && service.benefits.length > 0 && (
+                <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+                  {service.benefits.slice(0, 4).map((benefit, idx) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg sm:rounded-xl border border-gray-100">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 flex items-center justify-center flex-shrink-0">
+                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                      </div>
+                      <p className="text-xs sm:text-sm text-gray-700">{benefit}</p>
                     </div>
-                    <p className="text-xs sm:text-sm text-gray-700">{benefit}</p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Subtypes Section - Mobile Friendly */}
+            {/* Subtypes Section */}
             {service.subtypes && service.subtypes.length > 0 && (
               <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -623,7 +701,7 @@ function LoanDetails() {
                 )}
               </div>
 
-              {renderDocuments()}
+              {renderDocuments}
             </div>
 
             {/* Process Section */}
@@ -667,9 +745,9 @@ function LoanDetails() {
             </div>
           </div>
 
-          {/* Right Column - Sidebar (Hidden on mobile, shown as bottom action bar) */}
+          {/* Right Column - Sidebar */}
           <div className="lg:col-span-1 space-y-4 sm:space-y-6">
-            {/* Quick Action Card - Mobile: Fixed bottom action bar */}
+            {/* Quick Action Card */}
             {isMobile ? (
               <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-3 z-50">
                 <div className="flex gap-2">
@@ -710,10 +788,13 @@ function LoanDetails() {
                   
                   <button
                     onClick={handleDownloadPDF}
-                    className="block w-full bg-white/10 backdrop-blur-sm text-white text-center py-3 rounded-xl font-bold hover:bg-white/20 transition border border-white/20 text-sm sm:text-base"
+                    disabled={pdfLoading}
+                    className={`block w-full bg-white/10 backdrop-blur-sm text-white text-center py-3 rounded-xl font-bold hover:bg-white/20 transition border border-white/20 text-sm sm:text-base ${
+                      pdfLoading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
                     <Download className="inline-block w-4 h-4 mr-2" />
-                    Download PDF
+                    {pdfLoading ? 'Generating...' : 'Download PDF'}
                   </button>
                 </div>
                 
