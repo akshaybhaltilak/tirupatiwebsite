@@ -8,16 +8,11 @@ import {
   Clock, 
   Users, 
   Target, 
-  ArrowRight, 
   CheckCircle,
+  Percent,
   Home,
   Building,
-  GraduationCap,
-  Briefcase,
-  FileText,
-  Percent,
-  Phone,
-  Calculator
+  FileText
 } from 'lucide-react';
 
 const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
@@ -26,82 +21,40 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
   const [progress, setProgress] = useState(0);
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  // Default professional services with single reliable image for each
+  // Three professional services with proper images
   const defaultServices = [
     {
       id: 1,
-      title: "Home Loans",
-      description: "Get your dream home with competitive rates starting at 8.5% and flexible repayment up to 30 years.",
+      title: "Loan Services",
+      description: "Comprehensive loan solutions including personal, business, and education loans with competitive rates and flexible terms.",
       icon: Home,
-      features: ["Low Interest Rates", "Quick Processing", "Top-up Loans", "Balance Transfer"],
-      stats: [
-        { label: "Max Amount", value: "₹5 Crores" },
-        { label: "Rate", value: "8.5%" },
-        { label: "Processing", value: "3-5 Days" }
-      ],
+      features: ["Low Interest Rates", "Quick Approval", "Flexible Tenure", "Minimal Documentation"],
+   
       ctaText: "Apply Now",
-      color: "bg-gradient-to-r from-orange-600 to-amber-600",
-      imageUrl: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+      color: "bg-gradient-to-r from-blue-600 to-indigo-600",
+      imageUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
     },
     {
       id: 2,
-      title: "Business Loans",
-      description: "Grow your business with collateral-free loans up to ₹2 Crores, approved within 48 hours.",
-      icon: Briefcase,
-      features: ["Collateral Free", "Digital Process", "Flexible Tenure", "Quick Approval"],
-      stats: [
-        { label: "Max Amount", value: "₹2 Crores" },
-        { label: "Tenure", value: "1-5 Years" },
-        { label: "Approval", value: "48 Hours" }
-      ],
-      ctaText: "Get Loan",
-      color: "bg-gradient-to-r from-blue-600 to-cyan-600",
-      imageUrl: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+      title: "Mortgage Services",
+      description: "Expert mortgage registration, documentation, and property verification services with 100% success rate.",
+      icon: Building,
+      features: ["Property Verification", "Legal Support", "Fast Processing", "Expert Guidance"],
+    
+      ctaText: "Get Started",
+      color: "bg-gradient-to-r from-green-600 to-teal-600",
+      imageUrl: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
     },
     {
       id: 3,
-      title: "Education Loans",
-      description: "100% finance for higher education in India and abroad with flexible repayment options.",
-      icon: GraduationCap,
-      features: ["100% Finance", "Tax Benefits", "Moratorium Period", "Low Rates"],
-      stats: [
-        { label: "Coverage", value: "100%" },
-        { label: "Max Limit", value: "₹50 Lakhs" },
-        { label: "Processing", value: "5-7 Days" }
-      ],
-      ctaText: "Apply Now",
-      color: "bg-gradient-to-r from-purple-600 to-pink-600",
-      imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
-    },
-    {
-      id: 4,
-      title: "Loan Against Property",
-      description: "Unlock your property's value for business or personal needs with high loan-to-value ratio.",
-      icon: Building,
-      features: ["High Loan Value", "Long Tenure", "Low Interest", "Multipurpose"],
-      stats: [
-        { label: "LTV Ratio", value: "Up to 70%" },
-        { label: "Tenure", value: "15 Years" },
-        { label: "Processing", value: "7-10 Days" }
-      ],
-      ctaText: "Check Eligibility",
-      color: "bg-gradient-to-r from-emerald-600 to-teal-600",
-      imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
-    },
-    {
-      id: 5,
-      title: "Mortgage Services",
-      description: "Professional mortgage registration, documentation and property verification services.",
+      title: "Other Services",
+      description: "Complete financial solutions including insurance, investment planning, credit cards, and wealth management.",
       icon: FileText,
-      features: ["Expert Guidance", "Fast Processing", "Online Tracking", "Legal Support"],
-      stats: [
-        { label: "Services", value: "50+" },
-        { label: "Duration", value: "1-3 Days" },
-        { label: "Success", value: "100%" }
-      ],
-      ctaText: "View Services",
-      color: "bg-gradient-to-r from-red-600 to-orange-600",
-      imageUrl: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+      features: ["Insurance Plans", "Investment Advice", "Credit Cards", "Wealth Management"],
+    
+      ctaText: "Explore Services",
+      color: "bg-gradient-to-r from-purple-600 to-pink-600",
+      imageUrl: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
     }
   ];
 
@@ -111,13 +64,18 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
   useEffect(() => {
     setImgLoaded(false);
     
-    // Preload next image
-    const nextIndex = (currentSlide + 1) % enhancedServices.length;
-    const nextService = enhancedServices[nextIndex];
-    if (nextService.imageUrl) {
-      const img = new Image();
-      img.src = nextService.imageUrl;
-    }
+    // Preload all images on component mount
+    enhancedServices.forEach(service => {
+      if (service.imageUrl) {
+        const img = new Image();
+        img.src = service.imageUrl;
+        img.onload = () => {
+          if (service.id === enhancedServices[currentSlide].id) {
+            setImgLoaded(true);
+          }
+        };
+      }
+    });
   }, [currentSlide, enhancedServices]);
 
   // Auto slide change with progress bar
@@ -164,13 +122,27 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
   // Handle image error
   const handleImageError = (e) => {
     console.warn(`Image failed to load: ${currentService.imageUrl}`);
-    // Use gradient background as fallback
-    e.target.style.display = 'none';
+    // Don't hide the image, just set loaded to true to show gradient fallback
+    setImgLoaded(true);
+  };
+
+  const handleImageLoad = () => {
     setImgLoaded(true);
   };
 
   // Mobile responsive breakpoints
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize(); // Set initial value
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div 
@@ -180,11 +152,9 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
     >
       {/* Background Image with Gradient Overlay */}
       <div className="absolute inset-0">
-        {/* Gradient fallback */}
+        {/* Gradient fallback - always visible but behind image */}
         <div 
-          className={`absolute inset-0 ${currentService.color} transition-opacity duration-500 ${
-            imgLoaded ? 'opacity-0' : 'opacity-100'
-          }`}
+          className={`absolute inset-0 ${currentService.color} transition-opacity duration-500`}
         />
         
         {/* Main Image */}
@@ -192,10 +162,10 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
           src={currentService.imageUrl}
           alt={currentService.title}
           className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
-            imgLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            imgLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           loading="eager"
-          onLoad={() => setImgLoaded(true)}
+          onLoad={handleImageLoad}
           onError={handleImageError}
         />
         
@@ -203,6 +173,13 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
       </div>
+
+      {/* Loading indicator */}
+      {!imgLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+        </div>
+      )}
 
       {/* Content - Responsive Layout */}
       <div className="relative h-full flex items-center">
@@ -214,7 +191,7 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
                 {/* Badge */}
                 <div className="inline-flex items-center gap-2 bg-white/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-4 sm:mb-6 backdrop-blur-sm border border-white/20">
                   <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="text-xs sm:text-sm font-semibold">Featured Service</span>
+                  <span className="text-xs sm:text-sm font-semibold">Premium Service</span>
                 </div>
 
                 {/* Title & Description */}
@@ -241,7 +218,7 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6 max-w-xl">
                   {currentService.features?.slice(0, isMobile ? 2 : 4).map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center flex-shrink-0">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0">
                         <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                       </div>
                       <span className="text-xs sm:text-sm text-white/95">{feature}</span>
@@ -249,21 +226,7 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
                   ))}
                 </div>
 
-                {/* CTA Buttons - Stack on mobile */}
-                {/* <div className="flex flex-col sm:flex-row gap-3">
-                  <button className="group inline-flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md">
-                    <span>{currentService.ctaText}</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 sm:group-hover:translate-x-2 transition-transform" />
-                  </button>
-                  
-                  <a 
-                    href="tel:9850366753"
-                    className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-medium hover:bg-white/20 transition border border-white/20"
-                  >
-                    <Phone className="w-4 h-4" />
-                    <span>Call Now</span>
-                  </a>
-                </div> */}
+                {/* CTA buttons removed intentionally (design: image-first banner) */}
               </div>
 
               {/* Right Content - Why Choose Us (Hidden on mobile, shown on desktop) */}
@@ -299,32 +262,6 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
         </div>
       </div>
 
-      {/* Mobile Benefits Bar (Shown only on mobile) */}
-      {isMobile && (
-        <div className="absolute bottom-20 left-0 right-0 px-4">
-          {/* <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-white" />
-                <span className="text-xs text-white">Trusted</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-white" />
-                <span className="text-xs text-white">Quick Process</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-white" />
-                <span className="text-xs text-white">Expert Support</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Percent className="w-4 h-4 text-white" />
-                <span className="text-xs text-white">Best Rates</span>
-              </div>
-            </div>
-          </div> */}
-        </div>
-      )}
-
       {/* Navigation Controls - Responsive */}
       <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 sm:gap-4">
         <button
@@ -351,7 +288,7 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
               }`}>
                 {index === currentSlide && (
                   <div 
-                    className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-100"
+                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-100"
                     style={{ width: `${progress}%` }}
                   />
                 )}
@@ -400,41 +337,6 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
           </div>
         </div>
       </div>
-
-      {/* Quick Service Selector (Desktop only) */}
-      {/* <div className="absolute bottom-4 left-4 z-20 hidden lg:block">
-        <div className="bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-white/80 font-medium">Browse:</span>
-            <div className="flex gap-1">
-              {enhancedServices.slice(0, 3).map((service, index) => (
-                <button
-                  key={service.id}
-                  onClick={() => goToSlide(index)}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                    index === currentSlide
-                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
-                      : 'bg-white/10 text-white/80 hover:bg-white/20'
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Add loading spinner style */}
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        .animate-spin {
-          animation: spin 1s linear infinite;
-        }
-      `}</style>
     </div>
   );
 };

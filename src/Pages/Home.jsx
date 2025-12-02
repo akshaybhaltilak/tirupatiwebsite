@@ -16,7 +16,16 @@ import {
   Home as HomeIcon,
   Phone,
   Menu,
-  X
+  X,
+  FileText,
+  CreditCard,
+  Building,
+  FileSearch,
+  Eye,
+  CheckCircle,
+  ArrowRightCircle,
+  ClipboardCheck,
+  
 } from 'lucide-react';
 import BankMarquee from '../Components/BankMarquee';
 import BannerSlider from '../Components/BannerSlider';
@@ -84,6 +93,82 @@ function Home() {
       label: "Trust & Safety", 
       icon: Shield,
       color: "text-red-500"
+    }
+  ], []);
+
+  // Business Process Flow Steps
+  const processSteps = useMemo(() => [
+    {
+      id: 1,
+      title: "Application",
+      description: "Submit your loan application with basic details",
+      icon: FileText,
+      color: "from-blue-500 to-cyan-500",
+      bgColor: "bg-blue-50",
+      details: "Quick online form submission with minimal requirements"
+    },
+    {
+      id: 2,
+      title: "CIBIL Check",
+      description: "Credit score verification & assessment",
+      icon: CreditCard,
+      color: "from-purple-500 to-pink-500",
+      bgColor: "bg-purple-50",
+      details: "Instant credit score verification for faster processing"
+    },
+    {
+      id: 3,
+      title: "EMI/NMI Ratio",
+      description: "Income verification & eligibility calculation",
+      icon: TrendingUp,
+      color: "from-green-500 to-emerald-500",
+      bgColor: "bg-green-50",
+      details: "Income assessment to determine loan eligibility"
+    },
+    {
+      id: 4,
+      title: "Search & Valuation",
+      description: "Property documentation & valuation check",
+      icon: FileSearch,
+      color: "from-amber-500 to-orange-500",
+      bgColor: "bg-amber-50",
+      details: "Comprehensive property verification & valuation"
+    },
+    {
+      id: 5,
+      title: "Bank Inspection",
+      description: "Physical property inspection & verification",
+      icon: Eye,
+      color: "from-red-500 to-pink-500",
+      bgColor: "bg-red-50",
+      details: "On-site property inspection by bank officials"
+    },
+    {
+      id: 6,
+      title: "Sanction",
+      description: "Loan approval & sanction letter issuance",
+      icon: CheckCircle,
+      color: "from-indigo-500 to-blue-500",
+      bgColor: "bg-indigo-50",
+      details: "Official loan approval with detailed terms"
+    },
+    {
+      id: 7,
+      title: "Mortgage",
+      description: "Property registration & documentation",
+      icon: Building,
+      color: "from-teal-500 to-green-500",
+      bgColor: "bg-teal-50",
+      details: "Legal documentation & property mortgage process"
+    },
+    {
+      id: 8,
+      title: "Disbursement",
+      description: "Final loan amount disbursement",
+      icon: ArrowRightCircle,
+      color: "from-cyan-500 to-blue-500",
+      bgColor: "bg-cyan-50",
+      details: "Quick fund transfer to your account"
     }
   ], []);
 
@@ -176,41 +261,121 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-amber-50 text-gray-800">
-      {/* Sticky Navigation Bar */}
-    
-
       {/* HERO Section */}
       <BannerSlider/>
-      {/* <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-8">
-        <BannerSlider services={[
-          {
-            title: "Home Loans",
-            description: "Get your dream home with attractive interest rates starting from 8.5% with flexible tenure up to 30 years",
-            icon: "🏠",
-            gradient: "bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600",
-            features: ["Lowest Interest Rates", "Quick Processing", "Minimal Documentation", "Balance Transfer"],
-            ctaText: "Apply Now"
-          },
-          {
-            title: "Business Loans",
-            description: "Grow your business with flexible financing up to ₹5 Crores for expansion, working capital, or equipment",
-            icon: "💼",
-            gradient: "bg-gradient-to-r from-amber-600 to-orange-600",
-            features: ["Collateral Free Options", "Digital Processing", "24-48 Hour Approval", "Customized Plans"],
-            ctaText: "Explore Loans"
-          },
-          {
-            title: "Education Loans",
-            description: "Invest in your future with 100% finance for higher education in India and abroad",
-            icon: "🎓",
-            gradient: "bg-gradient-to-r from-yellow-600 to-amber-600",
-            features: ["Cover Tuition & Living", "Moratorium Period", "Tax Benefits", "Co-applicant Options"],
-            ctaText: "Learn More"
-          }
-        ]} />
-      </section> */}
-
+      
       <BankMarquee />
+
+      {/* Business Process Flow Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-amber-100 px-4 py-2 rounded-full mb-4">
+            <ClipboardCheck className="w-4 h-4 text-orange-600" />
+            <span className="text-sm font-semibold text-orange-700">Our Process</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Simple & Transparent <span className="text-orange-600">Process Flow</span>
+          </h2>
+          <p className="text-gray-600 max-w-3xl mx-auto text-lg">
+            From application to disbursement - we guide you through every step of your loan journey
+          </p>
+        </div>
+
+        {/* Process Flow - Desktop View */}
+        <div className="hidden lg:block">
+          <div className="relative">
+            {/* Connecting Line */}
+            <div className="absolute left-0 right-0 top-12 h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-cyan-200"></div>
+            
+            <div className="grid grid-cols-8 gap-4 relative">
+              {processSteps.map((step, index) => {
+                const Icon = step.icon;
+                return (
+                  <div key={step.id} className="relative">
+                    {/* Step Number */}
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white border-2 border-orange-200 flex items-center justify-center text-sm font-bold text-orange-600">
+                      {step.id}
+                    </div>
+                    
+                    {/* Step Card */}
+                    <div className={`${step.bgColor} rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1`}>
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${step.color} flex items-center justify-center mb-4 mx-auto`}>
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-center mb-2">{step.title}</h3>
+                      <p className="text-sm text-gray-600 text-center mb-2">{step.description}</p>
+                      <div className="text-xs text-gray-500 text-center opacity-80">{step.details}</div>
+                    </div>
+
+                    {/* Arrow between steps */}
+                    {index < processSteps.length - 1 && (
+                      <div className="absolute top-1/2 -right-2 w-4 h-4 text-gray-300">
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Process Flow - Mobile View */}
+        <div className="lg:hidden">
+          <div className="space-y-6">
+            {processSteps.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.id} className="relative">
+                  {/* Step Number with Connecting Line */}
+                  <div className="flex items-start">
+                    <div className="relative">
+                      <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${step.color} flex items-center justify-center z-10 relative`}>
+                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                      </div>
+                      {index < processSteps.length - 1 && (
+                        <div className="absolute top-10 left-1/2 w-0.5 h-12 bg-gradient-to-b from-gray-200 to-gray-100 -translate-x-1/2"></div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 ml-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-medium text-gray-500">Step {step.id}</span>
+                        <div className="flex-1 h-0.5 bg-gradient-to-r from-gray-200 to-transparent"></div>
+                      </div>
+                      <div className={`${step.bgColor} rounded-xl p-4 border border-gray-100`}>
+                        <h3 className="font-bold text-gray-900 mb-1">{step.title}</h3>
+                        <p className="text-sm text-gray-600 mb-2">{step.description}</p>
+                        <div className="text-xs text-gray-500">{step.details}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Process Summary */}
+        <div className="mt-12 bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-orange-600 mb-2">8 Steps</div>
+              <div className="text-gray-700">Complete Process</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-green-600 mb-2">7-14 Days</div>
+              <div className="text-gray-700">Average Processing Time</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">95%</div>
+              <div className="text-gray-700">Success Rate</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Search Section */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-12">

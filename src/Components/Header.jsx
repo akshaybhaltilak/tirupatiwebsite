@@ -88,10 +88,16 @@ function Header() {
           <div className="flex items-center gap-4">
             <Link 
               to="/" 
-              className="flex items-center gap-2 hover:opacity-90 transition-opacity"
+              className="flex items-center gap-3 hover:opacity-90 transition-opacity"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center">
-                <HomeIcon className="w-5 h-5 text-white" />
+              {/* logo: responsive, accessible, with graceful fallback */}
+              <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center shadow-sm">
+                <img
+                  src="/logo.png"
+                  alt="Tirupati Agencies logo"
+                  className="w-full h-full object-contain p-1"
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo-fallback.png'; }}
+                />
               </div>
               <div>
                 <h1 className={`font-bold text-lg ${
