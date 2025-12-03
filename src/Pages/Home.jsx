@@ -25,7 +25,10 @@ import {
   CheckCircle,
   ArrowRightCircle,
   ClipboardCheck,
-  
+  Download,
+  FileDown,
+  BanknoteIcon,
+  AlertCircle
 } from 'lucide-react';
 import BankMarquee from '../Components/BankMarquee';
 import BannerSlider from '../Components/BannerSlider';
@@ -41,6 +44,7 @@ function Home() {
   const [showEmiPopup, setShowEmiPopup] = useState(false);
   const [isNavSticky, setIsNavSticky] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [downloading, setDownloading] = useState(null);
   const emiPrefill = useMemo(() => ({ amount: 500000, rate: 8.5, tenure: 60 }), []);
   const navRef = useRef(null);
 
@@ -66,6 +70,121 @@ function Home() {
       mortgageServices: services.filter(service => service.category === 'mortgage'),
       otherServices: services.filter(service => service.category === 'service')
     };
+  }, []);
+
+  // Simple PDF Forms Data - Maps to files in public/ folder
+  const pdfForms = useMemo(() => [
+    {
+      id: 1,
+      title: "SBI Home Loan Form",
+      bank: "State Bank of India",
+      icon: BanknoteIcon,
+      color: "bg-gradient-to-r from-orange-100 to-amber-100",
+      textColor: "text-orange-700",
+      borderColor: "border-orange-200",
+      downloadUrl: "/sbi hl appli from.pdf",
+      fileName: "SBI-Home-Loan-Application.pdf"
+    },
+    {
+      id: 2,
+      title: "SBI Top-Up Loan Form",
+      bank: "State Bank of India",
+      icon: BanknoteIcon,
+      color: "bg-gradient-to-r from-amber-100 to-yellow-100",
+      textColor: "text-amber-700",
+      borderColor: "border-amber-200",
+      downloadUrl: "/Top Up Loan Application.pdf",
+      fileName: "SBI-Top-Up-Loan-Application.pdf"
+    },
+    {
+      id: 3,
+      title: "Central Bank Home Loan",
+      bank: "Central Bank of India",
+      icon: BanknoteIcon,
+      color: "bg-gradient-to-r from-red-100 to-orange-100",
+      textColor: "text-red-700",
+      borderColor: "border-red-200",
+      downloadUrl: "/CENTRAL BANK APP FORM.pdf",
+      fileName: "Central-Bank-Home-Loan-Application.pdf"
+    },
+    {
+      id: 4,
+      title: "Bank of Maharashtra Home Loan",
+      bank: "Bank of Maharashtra",
+      icon: BanknoteIcon,
+      color: "bg-gradient-to-r from-orange-50 to-amber-50",
+      textColor: "text-orange-800",
+      borderColor: "border-orange-300",
+      downloadUrl: "/BOM APPLICATON FORM.pdf",
+      fileName: "Bank-of-Maharashtra-Home-Loan-Application.pdf"
+    }
+  ], []);
+
+  // Enhanced Handle PDF download with file checking
+  const handlePdfDownload = useCallback(async (form) => {
+    // Set downloading state for this specific form
+    setDownloading(form.id);
+    
+    try {
+      // First check if the file exists
+      const response = await fetch(form.downloadUrl, { method: 'HEAD' });
+      
+      if (response.ok) {
+        // File exists, proceed with download
+        const link = document.createElement('a');
+        link.href = form.downloadUrl;
+        link.download = form.fileName || `${form.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Show success feedback
+        setTimeout(() => {
+          alert(`✓ ${form.title} downloaded successfully!\nCheck your downloads folder.`);
+          setDownloading(null);
+        }, 100);
+      } else {
+        // File doesn't exist
+        throw new Error('File not found on server');
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      
+      // Check if it's a network error or file not found
+      if (error.message === 'Failed to fetch' || error.message === 'File not found on server') {
+        alert(`⚠️ ${form.title} form is currently unavailable.\n\nPlease contact us at 9850366753 to get this form directly.`);
+      } else {
+        alert('❌ Error downloading the form. Please check your internet connection and try again.');
+      }
+      
+      setDownloading(null);
+    }
+  }, []);
+
+  // Alternative download method for better mobile support
+  const handleAlternativeDownload = useCallback((form) => {
+    // For mobile devices, sometimes direct download works better
+    const link = document.createElement('a');
+    link.href = form.downloadUrl;
+    link.download = form.fileName || `${form.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+    link.target = '_blank'; // Open in new tab for mobile
+    
+    // For iOS devices
+    if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+      link.target = '_blank';
+      document.body.appendChild(link);
+      const clickEvent = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: false
+      });
+      link.dispatchEvent(clickEvent);
+      document.body.removeChild(link);
+    } else {
+      link.click();
+    }
+    
+    alert(`Downloading ${form.title}...\nIf download doesn't start, please check your browser settings.`);
   }, []);
 
   // Stats with enhanced design
@@ -539,6 +658,119 @@ function Home() {
             <p className="text-gray-600">Try searching or browse other categories</p>
           </div>
         )}
+      </section>
+
+      {/* PDF Forms Download Section - SIMPLE & LINEAR */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-amber-100 px-4 py-2 rounded-full mb-4">
+            <Download className="w-4 h-4 text-orange-600" />
+            <span className="text-sm font-semibold text-orange-700">Download Forms</span>
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            Ready-to-Use <span className="text-orange-600">Bank Forms</span>
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Download these official bank application forms. Fill and submit directly.
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
+          <div className="space-y-4">
+            {pdfForms.map((form) => {
+              const Icon = form.icon;
+              return (
+                <div 
+                  key={form.id}
+                  className={`${form.color} border ${form.borderColor} rounded-xl p-5 hover:shadow-md transition-all duration-200`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-white/70 flex items-center justify-center">
+                        <FileText className={`w-6 h-6 ${form.textColor}`} />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="font-bold text-gray-900">{form.title}</h3>
+                        <p className="text-sm text-gray-600">{form.bank}</p>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => handlePdfDownload(form)}
+                      disabled={downloading === form.id}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition border ${
+                        downloading === form.id
+                          ? 'bg-orange-100 text-orange-700 border-orange-300 cursor-not-allowed'
+                          : 'bg-white text-orange-600 hover:bg-orange-50 border-orange-200'
+                      }`}
+                    >
+                      {downloading === form.id ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
+                          Downloading...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-4 h-4" />
+                          Download PDF
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Enhanced Note Section */}
+          <div className="mt-8 space-y-4">
+            <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-100">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <Check className="w-4 h-4 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-700 mb-1">
+                    <span className="font-semibold">Note:</span> All forms are in PDF format. Download, print, fill, and submit directly to the bank.
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    File paths: <code className="bg-white px-1 rounded">/[filename].pdf</code> (stored in public/ folder)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-100">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Important:</span> PDF files are stored in the <code className="bg-white px-1 rounded">public/</code> folder and accessed as <code className="bg-white px-1 rounded">/filename.pdf</code>
+                  </p>
+                  <div className="flex gap-2 mt-2">
+                    <a 
+                      href="tel:9850366753"
+                      className="text-xs px-3 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition"
+                    >
+                      Call for Help
+                    </a>
+                    <button
+                      onClick={() => {
+                        const formNames = pdfForms.map(f => `• ${f.fileName}`).join('\n');
+                        alert(`PDF files available:\n\n${formNames}\n\nAll files are in public/ folder`);
+                      }}
+                      className="text-xs px-3 py-1 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition"
+                    >
+                      View File Names
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* CTA Section */}

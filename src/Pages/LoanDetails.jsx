@@ -61,13 +61,13 @@ function LoanDetails() {
   // Optimized image mapping with smaller, optimized images
   const imageMap = useMemo(() => ({
     // FLAT PURCHASE - Optimized with lower q parameter
-    'flat-purchase': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
-    'flat': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'flat-purchase': "https://res.cloudinary.com/dvtnm3d8k/image/upload/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_1_afuhwt.jpg",
+    'flat': "https://res.cloudinary.com/dvtnm3d8k/image/upload/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_1_afuhwt.jpg",
     'apartment': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
     
     // HOUSE PURCHASE
-    'house-purchase': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
-    'house': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+    'house-purchase': "https://res.cloudinary.com/dvtnm3d8k/image/upload/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_rbqnet.jpg",
+    'house': "https://res.cloudinary.com/dvtnm3d8k/image/upload/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_rbqnet.jpg",
     
     // CONSTRUCTION LOAN
     'construction-loan': "https://homefirstindia.com/app/uploads/2020/09/construction-2.jpg",

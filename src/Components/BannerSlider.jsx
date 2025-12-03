@@ -32,7 +32,7 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
    
       ctaText: "Apply Now",
       color: "bg-gradient-to-r from-blue-600 to-indigo-600",
-      imageUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+      imageUrl: "https://res.cloudinary.com/dvtnm3d8k/image/upload/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.02_pdvzrg.jpg"
     },
     {
       id: 2,
