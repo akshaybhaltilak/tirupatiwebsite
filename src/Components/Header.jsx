@@ -73,25 +73,24 @@ function Header() {
   };
 
   return (
-    <nav 
+    <nav
       ref={dropdownRef}
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-orange-100' 
-          : 'bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-100'
-      }`}
+      className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled
+          ? 'bg-white backdrop-blur-md shadow-lg'
+          : 'bg-white'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          
+
           {/* Logo and Home */}
-          <div className="flex items-center gap-4">
-            <Link 
-              to="/" 
-              className="flex items-center gap-3 hover:opacity-90 transition-opacity"
+          <div className="flex items-center">
+            <Link
+              to="/"
+              className="flex items-center hover:opacity-90 transition-opacity"
             >
               {/* logo: responsive, accessible, with graceful fallback */}
-              <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center shadow-sm">
+              <div className="w-30 h-30 rounded-lg overflow-hidden  flex items-center justify-center ">
                 <img
                   src="/logo.png"
                   alt="Tirupati Agencies logo"
@@ -99,41 +98,27 @@ function Header() {
                   onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo-fallback.png'; }}
                 />
               </div>
-              <div>
-                <h1 className={`font-bold text-lg ${
-                  isScrolled ? 'text-gray-900' : 'text-orange-700'
-                }`}>
-                  Tirupati Agencies
-                </h1>
-                <p className={`text-xs ${
-                  isScrolled ? 'text-gray-600' : 'text-orange-600'
-                }`}>
-                  Trusted Financial Partner
-                </p>
-              </div>
-            </Link>
-
-            {/* Home Button */}
-            <Link
-              to="/"
-              className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                isScrolled 
-                  ? 'text-orange-600 hover:bg-orange-50' 
-                  : 'text-orange-700 hover:bg-white/50'
-              }`}
-            >
-              <HomeIcon className="w-4 h-4" />
-              <span>Home</span>
             </Link>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-6">
 
+            <Link
+              to="/"
+              className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${isScrolled
+                  ? 'text-gray-50 hover:bg-orange-50'
+                  : 'text-gray-50 hover:bg-white/50'
+                }`}
+            >
+              <HomeIcon className="w-4 h-4" />
+              <span>Home</span>
+            </Link>
+
             {/* About Button (desktop) */}
             <Link
               to="/about"
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${isScrolled ? 'text-gray-700 hover:bg-orange-50 hover:text-orange-600' : 'text-orange-800 hover:bg-white/50'}`}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${isScrolled ? 'text-gray-700 hover:bg-orange-50 hover:text-orange-600' : 'text-orange-600 hover:bg-white/50'}`}
             >
               About
             </Link>
@@ -142,13 +127,12 @@ function Header() {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("loan")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                  dropdownOpen === "loan"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${dropdownOpen === "loan"
                     ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
                     : isScrolled
                       ? 'text-gray-700 hover:bg-orange-50 hover:text-orange-600'
-                      : 'text-orange-800 hover:bg-white/50'
-                }`}
+                      : 'text-orange-600 hover:bg-white/50'
+                  }`}
               >
                 <Briefcase className="w-4 h-4" />
                 <span>Loans</span>
@@ -201,13 +185,12 @@ function Header() {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("mortgage")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                  dropdownOpen === "mortgage"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${dropdownOpen === "mortgage"
                     ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
                     : isScrolled
                       ? 'text-gray-700 hover:bg-orange-50 hover:text-orange-600'
                       : 'text-orange-800 hover:bg-white/50'
-                }`}
+                  }`}
               >
                 <Building className="w-4 h-4" />
                 <span>Mortgage</span>
@@ -255,13 +238,12 @@ function Header() {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("service")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                  dropdownOpen === "service"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${dropdownOpen === "service"
                     ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
                     : isScrolled
                       ? 'text-gray-700 hover:bg-orange-50 hover:text-orange-600'
                       : 'text-orange-800 hover:bg-white/50'
-                }`}
+                  }`}
               >
                 <FileText className="w-4 h-4" />
                 <span>Services</span>
@@ -307,11 +289,10 @@ function Header() {
 
             {/* Contact Info */}
             <div className="flex items-center gap-3">
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                isScrolled 
-                  ? 'bg-orange-50 text-orange-700' 
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isScrolled
+                  ? 'bg-orange-50 text-orange-700'
                   : 'bg-white/50 text-orange-800'
-              }`}>
+                }`}>
                 <Phone className="w-4 h-4" />
                 <a
                   href="tel:9850366753"
@@ -334,11 +315,10 @@ function Header() {
           {/* Mobile Menu Toggle */}
           <button
             aria-label="Menu"
-            className={`md:hidden p-2 rounded-lg transition-all ${
-              isScrolled 
-                ? 'bg-orange-50 text-orange-600' 
+            className={`md:hidden p-2 rounded-lg transition-all ${isScrolled
+                ? 'bg-orange-50 text-orange-600'
                 : 'bg-white/50 text-orange-700'
-            }`}
+              }`}
             onClick={() => setOpenMenu(!openMenu)}
           >
             {openMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -348,7 +328,7 @@ function Header() {
 
       {/* Mobile Dropdown Menu */}
       {openMenu && (
-        <div 
+        <div
           ref={menuRef}
           className="md:hidden bg-white text-gray-900 shadow-xl border-t border-orange-100 animate-slideDown"
         >

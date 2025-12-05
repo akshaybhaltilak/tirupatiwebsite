@@ -491,7 +491,7 @@
 
   "mortgage-registration": {
     "id": "mortgage-registration",
-    "name": "Mortgage Registration",
+    "name": "Register Mortagage",
     "marathiName": "गहाण नोंदणी",
     "icon": "FileText",
     "description": "Complete mortgage registration services for property loans with legal documentation and compliance.",

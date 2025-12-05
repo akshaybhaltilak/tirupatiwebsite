@@ -1,5 +1,6 @@
 // Components/BannerSlider.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -12,75 +13,160 @@ import {
   Percent,
   Home,
   Building,
-  FileText
+  FileText,
+  CreditCard,
+  TrendingUp,
+  FileSearch,
+  Eye,
+  ArrowRightCircle,
+  ArrowRight,
+  FileCheck,
+  Calculator,
+  ClipboardCheck,
+  Wallet,
+  PieChart,
+  BarChart,
+  Phone,
+  Play,
+  Pause,
+  UserCheck,
+  Search,
+  DollarSign,
+  Award
 } from 'lucide-react';
 
-const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
+const BannerSlider = ({ services = [], autoChangeInterval = 8000 }) => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [imgLoaded, setImgLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [autoPlay, setAutoPlay] = useState(true);
 
-  // Three professional services with proper images
+  // Process Steps for different service types
+  const processSteps = useMemo(() => ({
+    loan: [
+      { id: 1, title: "Application", icon: FileText, color: "from-blue-500 to-cyan-500", duration: "1 Day" },
+      { id: 2, title: "CIBIL Check", icon: CreditCard, color: "from-purple-500 to-pink-500", duration: "1 Day" },
+      { id: 3, title: "Income Check", icon: TrendingUp, color: "from-green-500 to-emerald-500", duration: "2 Days" },
+      { id: 4, title: "Valuation", icon: Calculator, color: "from-amber-500 to-orange-500", duration: "2 Days" },
+      { id: 5, title: "Inspection", icon: Eye, color: "from-red-500 to-pink-500", duration: "1 Day" },
+      { id: 6, title: "Sanction", icon: Award, color: "from-indigo-500 to-blue-500", duration: "1 Day" },
+      { id: 7, title: "Mortgage", icon: FileCheck, color: "from-teal-500 to-green-500", duration: "2 Days" },
+      { id: 8, title: "Disbursement", icon: ArrowRightCircle, color: "from-cyan-500 to-blue-500", duration: "1 Day" },
+    ],
+    mortgage: [], // No process steps for mortgage
+    other: [
+      { id: 1, title: "Consultation", icon: Phone, color: "from-blue-500 to-cyan-500", duration: "1 Day" },
+      { id: 2, title: "Analysis", icon: PieChart, color: "from-purple-500 to-pink-500", duration: "2 Days" },
+      { id: 3, title: "Solution", icon: Target, color: "from-green-500 to-emerald-500", duration: "2 Days" },
+      { id: 4, title: "Processing", icon: BarChart, color: "from-amber-500 to-orange-500", duration: "3 Days" },
+      { id: 5, title: "Approval", icon: CheckCircle, color: "from-indigo-500 to-blue-500", duration: "1 Day" },
+      { id: 6, title: "Support", icon: Users, color: "from-teal-500 to-green-500", duration: "Ongoing" },
+      { id: 7, title: "Implementation", icon: UserCheck, color: "from-blue-500 to-indigo-500", duration: "2 Days" },
+      { id: 8, title: "Review", icon: Search, color: "from-purple-500 to-pink-500", duration: "1 Day" }
+    ]
+  }), []);
+
+  // Default services with enhanced details
   const defaultServices = [
     {
       id: 1,
-      title: "Loan Services",
-      description: "Comprehensive loan solutions including personal, business, and education loans with competitive rates and flexible terms.",
+      title: "Home Loan Services",
+      description: "Get your dream home with competitive rates starting from 8.5% p.a. and flexible repayment options.",
+      shortDescription: "Lowest interest rates with quick approval",
       icon: Home,
-      features: ["Low Interest Rates", "Quick Approval", "Flexible Tenure", "Minimal Documentation"],
-   
-      ctaText: "Apply Now",
-      color: "bg-gradient-to-r from-blue-600 to-indigo-600",
-      imageUrl: "https://res.cloudinary.com/dvtnm3d8k/image/upload/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.02_pdvzrg.jpg"
+      features: [
+        "Interest from 8.5%",
+        "Quick approval",
+        "30 years tenure",
+        "Balance transfer",
+        "Pre-approved offers"
+      ],
+      stats: [
+        { label: "Success", value: "100%" },
+        { label: "Time", value: "7 Days" },
+        { label: "Cities", value: "50+" }
+      ],
+      processType: "loan",
+      color: "from-blue-600 to-indigo-600",
+      imageUrl: "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.02_pdvzrg.jpg",
+      badge: "Popular",
+      showProcess: true,
+      serviceLink: "/#services"
     },
     {
       id: 2,
       title: "Mortgage Services",
-      description: "Expert mortgage registration, documentation, and property verification services with 100% success rate.",
+      description: "Complete property documentation, registration, and legal verification services with expert assistance.",
+      shortDescription: "End-to-end property documentation",
       icon: Building,
-      features: ["Property Verification", "Legal Support", "Fast Processing", "Expert Guidance"],
-    
-      ctaText: "Get Started",
-      color: "bg-gradient-to-r from-green-600 to-teal-600",
-      imageUrl: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+      features: [
+        "Property verification",
+        "Legal documentation",
+        "Registration",
+        "Title search",
+        "Valuation services",
+        "EMI calculation"
+      ],
+      stats: [
+        { label: "Success", value: "100%" },
+        { label: "Time", value: "15 Days" },
+        { label: "Cities", value: "50+" }
+      ],
+      processType: "mortgage",
+     
+      color: "from-green-600 to-teal-600",
+      imageUrl: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+      badge: "Expert",
+      showProcess: false,
+      serviceLink: "/#services"
     },
     {
       id: 3,
-      title: "Other Services",
-      description: "Complete financial solutions including insurance, investment planning, credit cards, and wealth management.",
+      title: "Financial Services",
+      description: "Complete financial planning including insurance, investments, and wealth management solutions.",
+      shortDescription: "One-stop financial solutions",
       icon: FileText,
-      features: ["Insurance Plans", "Investment Advice", "Credit Cards", "Wealth Management"],
-    
-      ctaText: "Explore Services",
-      color: "bg-gradient-to-r from-purple-600 to-pink-600",
-      imageUrl: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+      features: [
+        "Life Insurance",
+        "Health Insurance",
+        "Investment Planning",
+        "Wealth Management",
+        "Tax Planning",
+        "Retirement Plans"
+      ],
+      stats: [
+        { label: "Services", value: "25+" },
+        { label: "Clients", value: "10K+" },
+        { label: "Cities", value: "100+" }
+      ],
+      processType: "other",
+      
+      color: "from-purple-600 to-pink-600",
+      imageUrl: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
+      badge: "Premium",
+      showProcess: true,
+      serviceLink: "/#services"
     }
   ];
 
   const enhancedServices = services.length > 0 ? services : defaultServices;
 
-  // Reset image loaded state when slide changes
+  // Check mobile view
   useEffect(() => {
-    setImgLoaded(false);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
     
-    // Preload all images on component mount
-    enhancedServices.forEach(service => {
-      if (service.imageUrl) {
-        const img = new Image();
-        img.src = service.imageUrl;
-        img.onload = () => {
-          if (service.id === enhancedServices[currentSlide].id) {
-            setImgLoaded(true);
-          }
-        };
-      }
-    });
-  }, [currentSlide, enhancedServices]);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  // Auto slide change with progress bar
+  // Auto slide with progress
   useEffect(() => {
-    if (enhancedServices.length === 0 || isHovering) return;
+    if (enhancedServices.length === 0 || !autoPlay || isHovering) return;
 
     const startTime = Date.now();
     const interval = setInterval(() => {
@@ -88,172 +174,306 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
       setProgress(0);
     }, autoChangeInterval);
 
-    // Update progress bar
     const progressInterval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const newProgress = (elapsed % autoChangeInterval) / autoChangeInterval * 100;
       setProgress(newProgress);
-    }, 100);
+    }, 50);
 
     return () => {
       clearInterval(interval);
       clearInterval(progressInterval);
     };
-  }, [enhancedServices.length, autoChangeInterval, isHovering, currentSlide]);
+  }, [enhancedServices.length, autoChangeInterval, isHovering, currentSlide, autoPlay]);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % enhancedServices.length);
     setProgress(0);
   };
 
+  const defaultSlides = [
+    {
+      id: 'home-loan',
+      title: 'Home Loans Made Simple',
+      subtitle: 'Competitive rates, fast approvals',
+      image:
+        'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1770&q=80',
+      serviceLink: '/#services',
+    },
+    {
+      id: 'business-loan',
+      title: 'Business Loans For Growth',
+      subtitle: 'Flexible terms for every stage',
+      image:
+        'https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1770&q=80',
+      serviceLink: '/#services',
+    },
+    {
+      id: 'personal-loan',
+      title: 'Personal Loans Fast',
+      subtitle: 'Funds for emergencies and plans',
+      image:
+        'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1770&q=80',
+      serviceLink: '/#services',
+    },
+    {
+      id: 'other',
+      title: 'Financial Services & Advisory',
+      subtitle: 'End-to-end support for complex needs',
+      image:
+        'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1770&q=80',
+      serviceLink: '/#services',
+      process: [
+        'Consultation',
+        'Eligibility Check',
+        'Documentation',
+        'Application Submission',
+        'Approval',
+        'Disbursement',
+        'Implementation',
+        'Review & Monitoring',
+      ],
+    },
+  ];
+
+  const currentService = enhancedServices[currentSlide] || enhancedServices[0];
+  const currentProcessSteps = processSteps[currentService?.processType] || [];
+  const displayedProcessSteps = currentProcessSteps.slice(0, 8);
+
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + enhancedServices.length) % enhancedServices.length);
     setProgress(0);
   };
 
-  const goToSlide = (index) => {
-    setCurrentSlide(index);
+  const goToSlide = (i) => {
+    setCurrentSlide(i);
     setProgress(0);
   };
 
-  const currentService = enhancedServices[currentSlide];
-  const Icon = currentService.icon;
+  const toggleAutoPlay = () => setAutoPlay((v) => !v);
 
-  // Handle image error
-  const handleImageError = (e) => {
-    console.warn(`Image failed to load: ${currentService.imageUrl}`);
-    // Don't hide the image, just set loaded to true to show gradient fallback
-    setImgLoaded(true);
+  const handleApplyClick = () => {
+    if (currentService?.serviceLink) {
+      navigate(currentService.serviceLink);
+      if (currentService.serviceLink.startsWith('/#')) {
+        const id = currentService.serviceLink.replace('/#', '');
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 200);
+      }
+    }
   };
-
-  const handleImageLoad = () => {
-    setImgLoaded(true);
-  };
-
-  // Mobile responsive breakpoints
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    handleResize(); // Set initial value
-    window.addEventListener('resize', handleResize);
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   return (
     <div 
-      className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[600px] rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl group"
+      className="relative w-full h-[55vh] md:h-[65vh] rounded-xl md:rounded-2xl overflow-hidden shadow-xl group"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      {/* Background Image with Gradient Overlay */}
-      <div className="absolute inset-0">
-        {/* Gradient fallback - always visible but behind image */}
-        <div 
-          className={`absolute inset-0 ${currentService.color} transition-opacity duration-500`}
-        />
-        
-        {/* Main Image */}
         <img
           src={currentService.imageUrl}
           alt={currentService.title}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
-            imgLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          loading="eager"
-          onLoad={handleImageLoad}
-          onError={handleImageError}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
         />
-        
-        {/* Gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-      </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
 
-      {/* Loading indicator */}
-      {!imgLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-        </div>
-      )}
-
-      {/* Content - Responsive Layout */}
+      {/* Main Content */}
       <div className="relative h-full flex items-center">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 md:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-center">
-              {/* Left Content - Main Info */}
+            <div className="grid lg:grid-cols-2 gap-6 md:gap-8">
+              {/* Left Column - Service Info */}
               <div className="text-white">
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 bg-white/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-4 sm:mb-6 backdrop-blur-sm border border-white/20">
-                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="text-xs sm:text-sm font-semibold">Premium Service</span>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="inline-flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                    <Sparkles className="w-3 h-3" />
+                    <span className="text-xs font-semibold">{currentService.badge}</span>
+                  </div>
+                  <div className="text-xs text-white/70 bg-black/30 px-2 py-1 rounded">
+                    {currentService.processType === 'loan' ? 'Loan' : currentService.processType === 'mortgage' ? 'Property' : 'Financial'} Service
+                  </div>
                 </div>
 
                 {/* Title & Description */}
-                <div className="mb-4 sm:mb-6">
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 leading-tight">
+                <div className="mb-4">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 leading-tight">
                     {currentService.title}
                   </h2>
-                  <p className="text-sm sm:text-base md:text-lg text-white/90 mb-4 sm:mb-6 max-w-2xl leading-relaxed">
+                  <p className="text-sm md:text-base text-white/90 mb-3 max-w-lg leading-relaxed">
                     {currentService.description}
+                  </p>
+                  <p className="text-sm text-white/80 mb-4 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    {currentService.shortDescription}
                   </p>
                 </div>
 
-                {/* Stats Row - Responsive */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6 max-w-md">
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-3 mb-4 max-w-xs">
                   {currentService.stats?.map((stat, idx) => (
-                    <div key={idx} className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/20">
-                      <div className="text-xs sm:text-sm text-white/70 mb-1">{stat.label}</div>
-                      <div className="text-base sm:text-lg font-bold text-white">{stat.value}</div>
+                    <div key={idx} className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                      <div className="text-xs text-white/70 mb-1">{stat.label}</div>
+                      <div className="text-base font-bold">{stat.value}</div>
                     </div>
                   ))}
                 </div>
 
-                {/* Features List - Stack on mobile */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6 max-w-xl">
-                  {currentService.features?.slice(0, isMobile ? 2 : 4).map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0">
-                        <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
-                      </div>
-                      <span className="text-xs sm:text-sm text-white/95">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* CTA buttons removed intentionally (design: image-first banner) */}
-              </div>
-
-              {/* Right Content - Why Choose Us (Hidden on mobile, shown on desktop) */}
-              <div className="hidden lg:block">
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-white/20 max-w-md ml-auto">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                    <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                    <h3 className="text-xl sm:text-2xl font-bold text-white">Why Choose Us?</h3>
-                  </div>
-                  
-                  <div className="space-y-3 sm:space-y-4">
-                    {[
-                      { icon: Shield, title: "Trusted Partner", desc: "10+ years in financial services" },
-                      { icon: Clock, title: "Quick Processing", desc: "Fast approvals & minimal docs" },
-                      { icon: Users, title: "Expert Support", desc: "Dedicated relationship manager" },
-                      { icon: Percent, title: "Best Rates", desc: "Lowest interest rates" }
-                    ].map((item, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center flex-shrink-0 border border-white/20">
-                          <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                {/* Features */}
+                <div className="mb-6">
+                  <div className="grid grid-cols-2 gap-2 max-w-md">
+                    {currentService.features?.slice(0, 4).map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0">
+                          <CheckCircle className="w-2.5 h-2.5 text-white" />
                         </div>
-                        <div>
-                          <h4 className="font-bold text-white text-base sm:text-lg mb-0.5 sm:mb-1">{item.title}</h4>
-                          <p className="text-white/80 text-xs sm:text-sm">{item.desc}</p>
-                        </div>
+                        <span className="text-sm text-white/95">{feature}</span>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* CTA Button */}
+                {/* <button 
+                  onClick={handleApplyClick}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center gap-2"
+                >
+                  <span>{currentService.ctaText}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button> */}
+              </div>
+
+              {/* Right Column - Conditional Content */}
+              <div className="flex flex-col gap-4">
+                {/* Show Process Steps only for loan and other services */}
+                {currentService.showProcess && currentProcessSteps.length > 0 ? (
+                  <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 h-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center">
+                          <Target className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-white">8-Step Process</h3>
+                          <p className="text-xs text-white/70">Complete loan journey</p>
+                        </div>
+                      </div>
+                      <div className="text-xs text-white/60">
+                        {currentProcessSteps.length} steps
+                      </div>
+                    </div>
+
+                    {/* Process Steps - Grid Layout */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {displayedProcessSteps.map((step) => (
+                        <div 
+                          key={step.id}
+                          className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:border-white/30 transition-all duration-200 group/step"
+                        >
+                          {/* Step Number */}
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-xs text-white/60">Step {step.id}</div>
+                            <div className="text-[10px] text-white/50">{step.duration}</div>
+                          </div>
+                          
+                          {/* Step Content */}
+                          <div className="flex items-center gap-2">
+                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${step.color} flex items-center justify-center flex-shrink-0 group-hover/step:scale-110 transition-transform`}>
+                              <step.icon className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs font-semibold text-white truncate">{step.title}</h4>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Process Timeline - Visual Connection */}
+                    {!isMobile && (
+                      <div className="mt-4 relative">
+                        <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-cyan-500/30 -translate-y-1/2"></div>
+                        <div className="flex justify-between relative z-10">
+                          {[1, 2, 3, 4, 5, 6, 7, 8].map((stepNum) => (
+                            <div key={stepNum} className="relative">
+                              <div className={`w-2 h-2 rounded-full ${stepNum <= currentProcessSteps.length ? 'bg-gradient-to-r from-blue-500 to-cyan-500' : 'bg-white/20'}`}></div>
+                              {stepNum % 2 === 0 && (
+                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-white/70">
+                                  Step {stepNum}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Why Choose Us - For Mortgage Services */
+                  <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 h-full">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-white">Why Choose Us</h3>
+                        <p className="text-xs text-white/70">Trusted by thousands</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { icon: Shield, title: "10+ Years", desc: "Experience", color: "from-blue-500 to-cyan-500" },
+                        { icon: Clock, title: "Fast", desc: "Processing", color: "from-green-500 to-emerald-500" },
+                        { icon: Users, title: "Expert", desc: "Support", color: "from-purple-500 to-pink-500" },
+                        { icon: Percent, title: "Best", desc: "Rates", color: "from-amber-500 to-orange-500" }
+                      ].map((item, idx) => (
+                        <div key={idx} className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:border-white/30 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${item.color} flex items-center justify-center`}>
+                              <item.icon className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-white text-sm">{item.title}</div>
+                              <div className="text-white/70 text-xs">{item.desc}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Additional Benefits */}
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      {[
+                        "100% Success Rate",
+                        "Legal Expertise",
+                        "Transparent Pricing",
+                        "Dedicated Manager"
+                      ].map((benefit, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <CheckCircle className="w-3 h-3 text-green-400" />
+                          <span className="text-xs text-white/90">{benefit}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Info */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center">
+                      <Phone className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">Need Help?</div>
+                      <a href="tel:9850366753" className="text-xs text-white/80 hover:text-white transition-colors">
+                        Call: 98503 66753
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -262,79 +482,80 @@ const BannerSlider = ({ services = [], autoChangeInterval = 15000 }) => {
         </div>
       </div>
 
-      {/* Navigation Controls - Responsive */}
-      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 sm:gap-4">
+      {/* Navigation Controls */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/30 backdrop-blur-lg px-4 py-2 rounded-full border border-white/10">
         <button
           onClick={prevSlide}
-          className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all backdrop-blur-sm hover:scale-110 border border-white/30 shadow-lg"
+          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all backdrop-blur-sm hover:scale-110"
           aria-label="Previous slide"
         >
-          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
 
-        {/* Slide Dots - Responsive */}
-        <div className="flex gap-2 sm:gap-3">
-          {enhancedServices.map((_, index) => (
+        {/* Slide Dots */}
+        <div className="flex gap-2">
+          {enhancedServices.map((service, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className="group relative"
-              aria-label={`Go to slide ${index + 1}`}
+              className="relative group"
+              aria-label={`Go to ${service.title}`}
             >
-              <div className={`w-8 h-1.5 sm:w-10 md:w-12 rounded-full transition-all ${
-                index === currentSlide 
-                  ? 'bg-white' 
-                  : 'bg-white/30 hover:bg-white/50'
+              <div className={`w-10 h-1.5 rounded-full overflow-hidden ${
+                index === currentSlide ? 'bg-white/40' : 'bg-white/20'
               }`}>
                 {index === currentSlide && (
                   <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-100"
+                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
                     style={{ width: `${progress}%` }}
                   />
                 )}
               </div>
-              {/* Slide number tooltip on hover (desktop only) */}
-              {!isMobile && (
-                <div className={`absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-medium transition-all whitespace-nowrap ${
-                  index === currentSlide 
-                    ? 'text-white opacity-100' 
-                    : 'text-white/50 opacity-0 group-hover:opacity-100'
-                }`}>
-                  {index + 1}
-                </div>
-              )}
+              <div className={`absolute -top-6 left-1/2 -translate-x-1/2 text-xs px-2 py-1 rounded whitespace-nowrap transition-opacity ${
+                index === currentSlide 
+                  ? 'text-white bg-black/40 opacity-100' 
+                  : 'opacity-0 group-hover:opacity-100'
+              }`}>
+                {service.processType}
+              </div>
             </button>
           ))}
         </div>
 
         <button
           onClick={nextSlide}
-          className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all backdrop-blur-sm hover:scale-110 border border-white/30 shadow-lg"
+          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all backdrop-blur-sm hover:scale-110"
           aria-label="Next slide"
         >
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+          <ChevronRight className="w-4 h-4" />
+        </button>
+
+        {/* Auto-play Toggle */}
+        <button
+          onClick={toggleAutoPlay}
+          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all backdrop-blur-sm ml-2"
+          aria-label={autoPlay ? "Pause auto-play" : "Play auto-play"}
+        >
+          {autoPlay ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </button>
       </div>
 
-      {/* Slide Counter - Responsive */}
-      <div className="absolute top-4 sm:top-6 right-4 sm:right-6 z-20">
-        <div className="bg-white/20 backdrop-blur-md rounded-lg sm:rounded-xl px-3 py-1.5 sm:px-4 sm:py-2 border border-white/30">
-          <div className="text-white text-xs sm:text-sm font-semibold">
-            <span className="text-lg sm:text-xl md:text-2xl">{currentSlide + 1}</span>
-            <span className="text-white/70">/{enhancedServices.length}</span>
-          </div>
+      {/* Slide Counter */}
+      <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-lg rounded-lg px-3 py-2 border border-white/20">
+        <div className="text-white font-semibold flex items-center gap-1">
+          <span className="text-xl">{currentSlide + 1}</span>
+          <span className="text-white/50">/</span>
+          <span className="text-white/70">{enhancedServices.length}</span>
         </div>
       </div>
 
-      {/* Auto-play Indicator - Responsive */}
-      <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-20">
-        <div className="bg-black/30 backdrop-blur-sm rounded-full px-2 py-1 sm:px-3 sm:py-1.5">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isHovering ? 'bg-yellow-400' : 'bg-green-400'}`}></div>
-            <span className="text-[10px] sm:text-xs text-white font-medium">
-              {isHovering ? 'Paused' : 'Auto'}
-            </span>
-          </div>
+      {/* Service Type Badge */}
+      <div className="absolute top-4 left-4 bg-gradient-to-r from-blue-600/80 to-indigo-600/80 backdrop-blur-sm rounded-full px-3 py-1.5">
+        <div className="flex items-center gap-2">
+          <currentService.icon className="w-4 h-4 text-white" />
+          <span className="text-xs font-semibold text-white capitalize">
+            {currentService.processType}
+          </span>
         </div>
       </div>
     </div>

@@ -7,8 +7,6 @@ import {
   Clock,
   Award,
   ArrowRight,
-  Calculator,
-  MessageCircle,
   ChevronRight,
   Check,
   TrendingUp,
@@ -32,7 +30,6 @@ import {
 } from 'lucide-react';
 import BankMarquee from '../Components/BankMarquee';
 import BannerSlider from '../Components/BannerSlider';
-import EmiCalculator from '../Components/EmiCalculator';
 import loanDetails from '../data/loanDetails.json';
 
 function Home() {
@@ -40,27 +37,7 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [activeTab, setActiveTab] = useState('loans');
-  const [showWhatsApp, setShowWhatsApp] = useState(true);
-  const [showEmiPopup, setShowEmiPopup] = useState(false);
-  const [isNavSticky, setIsNavSticky] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [downloading, setDownloading] = useState(null);
-  const emiPrefill = useMemo(() => ({ amount: 500000, rate: 8.5, tenure: 60 }), []);
-  const navRef = useRef(null);
-
-  // Sticky navbar behavior
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setIsNavSticky(true);
-      } else {
-        setIsNavSticky(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Memoized services by category
   const { loanServices, mortgageServices, otherServices } = useMemo(() => {
@@ -72,223 +49,73 @@ function Home() {
     };
   }, []);
 
-  // Simple PDF Forms Data - Maps to files in public/ folder
+  // Simple PDF Forms Data
   const pdfForms = useMemo(() => [
     {
-      id: 1,
-      title: "SBI Home Loan Form",
-      bank: "State Bank of India",
-      icon: BanknoteIcon,
-      color: "bg-gradient-to-r from-orange-100 to-amber-100",
-      textColor: "text-orange-700",
-      borderColor: "border-orange-200",
-      downloadUrl: "/sbi hl appli from.pdf",
-      fileName: "SBI-Home-Loan-Application.pdf"
+      id: 1, title: "SBI Home Loan Form", bank: "State Bank of India",
+      color: "bg-orange-50", textColor: "text-orange-700", borderColor: "border-orange-200",
+      downloadUrl: "/sbi hl appli from.pdf", fileName: "SBI-Home-Loan-Application.pdf"
     },
     {
-      id: 2,
-      title: "SBI Top-Up Loan Form",
-      bank: "State Bank of India",
-      icon: BanknoteIcon,
-      color: "bg-gradient-to-r from-amber-100 to-yellow-100",
-      textColor: "text-amber-700",
-      borderColor: "border-amber-200",
-      downloadUrl: "/Top Up Loan Application.pdf",
-      fileName: "SBI-Top-Up-Loan-Application.pdf"
+      id: 2, title: "SBI Top-Up Loan Form", bank: "State Bank of India",
+      color: "bg-amber-50", textColor: "text-amber-700", borderColor: "border-amber-200",
+      downloadUrl: "/Top Up Loan Application.pdf", fileName: "SBI-Top-Up-Loan-Application.pdf"
     },
     {
-      id: 3,
-      title: "Central Bank Home Loan",
-      bank: "Central Bank of India",
-      icon: BanknoteIcon,
-      color: "bg-gradient-to-r from-red-100 to-orange-100",
-      textColor: "text-red-700",
-      borderColor: "border-red-200",
-      downloadUrl: "/CENTRAL BANK APP FORM.pdf",
-      fileName: "Central-Bank-Home-Loan-Application.pdf"
+      id: 3, title: "Central Bank Home Loan", bank: "Central Bank of India",
+      color: "bg-red-50", textColor: "text-red-700", borderColor: "border-red-200",
+      downloadUrl: "/CENTRAL BANK APP FORM.pdf", fileName: "Central-Bank-Home-Loan-Application.pdf"
     },
     {
-      id: 4,
-      title: "Bank of Maharashtra Home Loan",
-      bank: "Bank of Maharashtra",
-      icon: BanknoteIcon,
-      color: "bg-gradient-to-r from-orange-50 to-amber-50",
-      textColor: "text-orange-800",
-      borderColor: "border-orange-300",
-      downloadUrl: "/BOM APPLICATON FORM.pdf",
-      fileName: "Bank-of-Maharashtra-Home-Loan-Application.pdf"
+      id: 4, title: "Bank of Maharashtra Home Loan", bank: "Bank of Maharashtra",
+      color: "bg-orange-50", textColor: "text-orange-800", borderColor: "border-orange-300",
+      downloadUrl: "/BOM APPLICATON FORM.pdf", fileName: "Bank-of-Maharashtra-Home-Loan-Application.pdf"
     }
   ], []);
 
-  // Enhanced Handle PDF download with file checking
+  // Handle PDF download
   const handlePdfDownload = useCallback(async (form) => {
-    // Set downloading state for this specific form
     setDownloading(form.id);
-    
     try {
-      // First check if the file exists
       const response = await fetch(form.downloadUrl, { method: 'HEAD' });
-      
       if (response.ok) {
-        // File exists, proceed with download
         const link = document.createElement('a');
         link.href = form.downloadUrl;
-        link.download = form.fileName || `${form.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+        link.download = form.fileName;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
-        // Show success feedback
         setTimeout(() => {
-          alert(`✓ ${form.title} downloaded successfully!\nCheck your downloads folder.`);
+          alert(`✓ ${form.title} downloaded!`);
           setDownloading(null);
         }, 100);
       } else {
-        // File doesn't exist
-        throw new Error('File not found on server');
+        throw new Error('File not found');
       }
     } catch (error) {
-      console.error('Error downloading PDF:', error);
-      
-      // Check if it's a network error or file not found
-      if (error.message === 'Failed to fetch' || error.message === 'File not found on server') {
-        alert(`⚠️ ${form.title} form is currently unavailable.\n\nPlease contact us at 9850366753 to get this form directly.`);
-      } else {
-        alert('❌ Error downloading the form. Please check your internet connection and try again.');
-      }
-      
+      alert(`⚠️ ${form.title} is unavailable. Call 9850366753 for assistance.`);
       setDownloading(null);
     }
   }, []);
 
-  // Alternative download method for better mobile support
-  const handleAlternativeDownload = useCallback((form) => {
-    // For mobile devices, sometimes direct download works better
-    const link = document.createElement('a');
-    link.href = form.downloadUrl;
-    link.download = form.fileName || `${form.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
-    link.target = '_blank'; // Open in new tab for mobile
-    
-    // For iOS devices
-    if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-      link.target = '_blank';
-      document.body.appendChild(link);
-      const clickEvent = new MouseEvent('click', {
-        view: window,
-        bubbles: true,
-        cancelable: false
-      });
-      link.dispatchEvent(clickEvent);
-      document.body.removeChild(link);
-    } else {
-      link.click();
-    }
-    
-    alert(`Downloading ${form.title}...\nIf download doesn't start, please check your browser settings.`);
-  }, []);
-
-  // Stats with enhanced design
+  // Stats
   const stats = useMemo(() => [
-    { 
-      number: "10+", 
-      label: "Years Experience", 
-      icon: Clock,
-      color: "text-orange-500"
-    },
-    { 
-      number: "5000+", 
-      label: "Happy Customers", 
-      icon: Users,
-      color: "text-amber-500"
-    },
-    { 
-      number: "15+", 
-      label: "Loan Products", 
-      icon: Award,
-      color: "text-yellow-500"
-    },
-    { 
-      number: "100%", 
-      label: "Trust & Safety", 
-      icon: Shield,
-      color: "text-red-500"
-    }
+    { number: "10+", label: "Years", icon: Clock, color: "text-orange-500" },
+    { number: "5000+", label: "Customers", icon: Users, color: "text-amber-500" },
+    { number: "15+", label: "Products", icon: Award, color: "text-yellow-500" },
+    { number: "100%", label: "Trust", icon: Shield, color: "text-red-500" }
   ], []);
 
-  // Business Process Flow Steps
+  // Process Steps
   const processSteps = useMemo(() => [
-    {
-      id: 1,
-      title: "Application",
-      description: "Submit your loan application with basic details",
-      icon: FileText,
-      color: "from-blue-500 to-cyan-500",
-      bgColor: "bg-blue-50",
-      details: "Quick online form submission with minimal requirements"
-    },
-    {
-      id: 2,
-      title: "CIBIL Check",
-      description: "Credit score verification & assessment",
-      icon: CreditCard,
-      color: "from-purple-500 to-pink-500",
-      bgColor: "bg-purple-50",
-      details: "Instant credit score verification for faster processing"
-    },
-    {
-      id: 3,
-      title: "EMI/NMI Ratio",
-      description: "Income verification & eligibility calculation",
-      icon: TrendingUp,
-      color: "from-green-500 to-emerald-500",
-      bgColor: "bg-green-50",
-      details: "Income assessment to determine loan eligibility"
-    },
-    {
-      id: 4,
-      title: "Search & Valuation",
-      description: "Property documentation & valuation check",
-      icon: FileSearch,
-      color: "from-amber-500 to-orange-500",
-      bgColor: "bg-amber-50",
-      details: "Comprehensive property verification & valuation"
-    },
-    {
-      id: 5,
-      title: "Bank Inspection",
-      description: "Physical property inspection & verification",
-      icon: Eye,
-      color: "from-red-500 to-pink-500",
-      bgColor: "bg-red-50",
-      details: "On-site property inspection by bank officials"
-    },
-    {
-      id: 6,
-      title: "Sanction",
-      description: "Loan approval & sanction letter issuance",
-      icon: CheckCircle,
-      color: "from-indigo-500 to-blue-500",
-      bgColor: "bg-indigo-50",
-      details: "Official loan approval with detailed terms"
-    },
-    {
-      id: 7,
-      title: "Mortgage",
-      description: "Property registration & documentation",
-      icon: Building,
-      color: "from-teal-500 to-green-500",
-      bgColor: "bg-teal-50",
-      details: "Legal documentation & property mortgage process"
-    },
-    {
-      id: 8,
-      title: "Disbursement",
-      description: "Final loan amount disbursement",
-      icon: ArrowRightCircle,
-      color: "from-cyan-500 to-blue-500",
-      bgColor: "bg-cyan-50",
-      details: "Quick fund transfer to your account"
-    }
+    { id: 1, title: "Application", icon: FileText, color: "from-blue-500 to-cyan-500", bgColor: "bg-blue-50" },
+    { id: 2, title: "CIBIL Check", icon: CreditCard, color: "from-purple-500 to-pink-500", bgColor: "bg-purple-50" },
+    { id: 3, title: "Income Check", icon: TrendingUp, color: "from-green-500 to-emerald-500", bgColor: "bg-green-50" },
+    { id: 4, title: "Valuation", icon: FileSearch, color: "from-amber-500 to-orange-500", bgColor: "bg-amber-50" },
+    { id: 5, title: "Inspection", icon: Eye, color: "from-red-500 to-pink-500", bgColor: "bg-red-50" },
+    { id: 6, title: "Sanction", icon: CheckCircle, color: "from-indigo-500 to-blue-500", bgColor: "bg-indigo-50" },
+    { id: 7, title: "Mortgage", icon: Building, color: "from-teal-500 to-green-500", bgColor: "bg-teal-50" },
+    { id: 8, title: "Disbursement", icon: ArrowRightCircle, color: "from-cyan-500 to-blue-500", bgColor: "bg-cyan-50" }
   ], []);
 
   // Icons mapping
@@ -306,14 +133,7 @@ function Home() {
     "mortgage-registration": "https://cdn-icons-gif.flaticon.com/19035/19035067.gif",
     "equitable-mortgage": "https://cdn-icons-gif.flaticon.com/12420/12420695.gif",
     "search-report": "https://cdn-icons-gif.flaticon.com/19018/19018144.gif",
-    "valuation-report": "https://cdn-icons-gif.flaticon.com/19013/19013048.gif",
-    "estimate-cross-verification": "https://cdn-icons-gif.flaticon.com/19028/19028420.gif",
-    "construction-estimate": "https://cdn-icons-gif.flaticon.com/12420/12420719.gif",
-    "ferfar-download": "https://cdn-icons-gif.flaticon.com/19021/19021456.gif",
-    "property-card": "https://cdn-icons-gif.flaticon.com/14099/14099167.gif",
-    "charge-creation": "https://cdn-icons-gif.flaticon.com/16678/16678014.gif",
-    "electric-bill-transfer": "https://cdn-icons-gif.flaticon.com/16438/16438892.gif",
-    "leave-license": "https://cdn-icons-gif.flaticon.com/15586/15586082.gif"
+    "valuation-report": "https://cdn-icons-gif.flaticon.com/19013/19013048.gif"
   }), []);
 
   const getCustomIcon = useCallback(
@@ -325,14 +145,12 @@ function Home() {
   const handleSearch = useCallback((e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-
     if (query.length > 1) {
       const filtered = Object.values(loanDetails).filter(service =>
         service.name.toLowerCase().includes(query) ||
-        service.marathiName.toLowerCase().includes(query) ||
-        (service.description || '').toLowerCase().includes(query)
+        service.marathiName.toLowerCase().includes(query)
       );
-      setSuggestions(filtered.slice(0, 6));
+      setSuggestions(filtered.slice(0, 5));
     } else {
       setSuggestions([]);
     }
@@ -358,235 +176,85 @@ function Home() {
   }, [activeTab, loanServices, mortgageServices, otherServices]);
 
   const tabs = useMemo(() => [
-    { 
-      id: 'loans', 
-      name: 'Loan Products', 
-      count: loanServices.length,
-      color: 'text-orange-600'
-    },
-    { 
-      id: 'mortgage', 
-      name: 'Mortgage Services', 
-      count: mortgageServices.length,
-      color: 'text-amber-600'
-    },
-    { 
-      id: 'services', 
-      name: 'Other Services', 
-      count: otherServices.length,
-      color: 'text-yellow-600'
-    }
+    { id: 'loans', name: 'Loan Products', count: loanServices.length },
+    { id: 'mortgage', name: 'Mortgage Services', count: mortgageServices.length },
+    { id: 'services', name: 'Other Services', count: otherServices.length }
   ], [loanServices.length, mortgageServices.length, otherServices.length]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-amber-50 text-gray-800">
+    <div className="min-h-screen bg-gray-50 text-gray-800">
       {/* HERO Section */}
       <BannerSlider/>
       
       <BankMarquee />
 
-      {/* Business Process Flow Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-amber-100 px-4 py-2 rounded-full mb-4">
-            <ClipboardCheck className="w-4 h-4 text-orange-600" />
-            <span className="text-sm font-semibold text-orange-700">Our Process</span>
+      {/* Search Section - Compact */}
+       <section className="max-w-6xl mx-auto px-3 sm:px-4 py-6">
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-1 bg-orange-100 px-3 py-1 rounded-full mb-2">
+            <ClipboardCheck className="w-3 h-3 text-orange-600" />
+            <span className="text-xs font-semibold text-orange-700">Process Flow</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Simple & Transparent <span className="text-orange-600">Process Flow</span>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">
+            How It <span className="text-orange-600">Works</span>
           </h2>
-          <p className="text-gray-600 max-w-3xl mx-auto text-lg">
-            From application to disbursement - we guide you through every step of your loan journey
-          </p>
         </div>
 
-        {/* Process Flow - Desktop View */}
-        <div className="hidden lg:block">
-          <div className="relative">
-            {/* Connecting Line */}
-            <div className="absolute left-0 right-0 top-12 h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-cyan-200"></div>
-            
-            <div className="grid grid-cols-8 gap-4 relative">
-              {processSteps.map((step, index) => {
-                const Icon = step.icon;
-                return (
-                  <div key={step.id} className="relative">
-                    {/* Step Number */}
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white border-2 border-orange-200 flex items-center justify-center text-sm font-bold text-orange-600">
-                      {step.id}
-                    </div>
-                    
-                    {/* Step Card */}
-                    <div className={`${step.bgColor} rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1`}>
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${step.color} flex items-center justify-center mb-4 mx-auto`}>
-                        <Icon className="w-6 h-6 text-white" />
-                      </div>
-                      <h3 className="font-bold text-gray-900 text-center mb-2">{step.title}</h3>
-                      <p className="text-sm text-gray-600 text-center mb-2">{step.description}</p>
-                      <div className="text-xs text-gray-500 text-center opacity-80">{step.details}</div>
-                    </div>
-
-                    {/* Arrow between steps */}
-                    {index < processSteps.length - 1 && (
-                      <div className="absolute top-1/2 -right-2 w-4 h-4 text-gray-300">
-                        <ChevronRight className="w-4 h-4" />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Process Flow - Mobile View */}
-        <div className="lg:hidden">
-          <div className="space-y-6">
-            {processSteps.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <div key={step.id} className="relative">
-                  {/* Step Number with Connecting Line */}
-                  <div className="flex items-start">
-                    <div className="relative">
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${step.color} flex items-center justify-center z-10 relative`}>
-                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                          <Icon className="w-4 h-4" />
-                        </div>
-                      </div>
-                      {index < processSteps.length - 1 && (
-                        <div className="absolute top-10 left-1/2 w-0.5 h-12 bg-gradient-to-b from-gray-200 to-gray-100 -translate-x-1/2"></div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 ml-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-medium text-gray-500">Step {step.id}</span>
-                        <div className="flex-1 h-0.5 bg-gradient-to-r from-gray-200 to-transparent"></div>
-                      </div>
-                      <div className={`${step.bgColor} rounded-xl p-4 border border-gray-100`}>
-                        <h3 className="font-bold text-gray-900 mb-1">{step.title}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{step.description}</p>
-                        <div className="text-xs text-gray-500">{step.details}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Process Summary */}
-        <div className="mt-12 bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-orange-600 mb-2">8 Steps</div>
-              <div className="text-gray-700">Complete Process</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">7-14 Days</div>
-              <div className="text-gray-700">Average Processing Time</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">95%</div>
-              <div className="text-gray-700">Success Rate</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Search Section */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-amber-100 px-4 py-2 rounded-full mb-4">
-            <Sparkles className="w-4 h-4 text-orange-600" />
-            <span className="text-sm font-semibold text-orange-700">Quick Search</span>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">
-            Find Your Perfect <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">Financial Solution</span>
-          </h2>
-          <p className="text-gray-600">
-            Search from our wide range of loan products and services
-          </p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl blur opacity-10"></div>
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search for loans, services, or type in मराठी..."
-              value={searchQuery}
-              onChange={handleSearch}
-              className="w-full pl-12 pr-4 py-4 rounded-xl border border-orange-200 focus:ring-2 focus:ring-orange-300 focus:border-orange-400 bg-white text-sm shadow-sm"
-            />
-          </div>
-
-          {suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 bg-white border border-orange-200 rounded-b-xl shadow-lg mt-1 z-50 max-h-64 overflow-y-auto">
-              {suggestions.map((service) => (
-                <div
-                  key={service.id}
-                  onClick={() => handleSuggestionClick(service)}
-                  className="px-4 py-3 cursor-pointer flex items-center gap-3 hover:bg-orange-50 transition border-b border-orange-50 last:border-0"
-                >
-                  <img src={getCustomIcon(service.id)} className="w-8 h-8 rounded" />
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{service.name}</div>
-                    <div className="text-xs text-gray-500">{service.marathiName}</div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-orange-400" />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {stats.map((stat, idx) => {
-            const Icon = stat.icon;
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {processSteps.map((step) => {
+            const Icon = step.icon;
             return (
-              <div 
-                key={idx} 
-                className="bg-white rounded-2xl p-6 text-center shadow-md hover:shadow-lg transition-all duration-300"
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-orange-50 to-amber-50 mb-4">
-                  <Icon className={`w-8 h-8 ${stat.color}`} />
+              <div key={step.id} className={`${step.bgColor} rounded-lg p-3 border border-gray-100`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${step.color} flex items-center justify-center`}>
+                    <Icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-500">Step {step.id}</span>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{stat.number}</div>
-                <div className="text-sm font-medium text-gray-600">{stat.label}</div>
+                <h3 className="font-bold text-gray-900 text-sm mb-1">{step.title}</h3>
               </div>
             );
           })}
         </div>
-      </section>
 
-      {/* Services Tabs */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">
-            Our <span className="text-orange-600">Financial Services</span>
+        {/* Process Summary */}
+        <div className="mt-4 bg-orange-50 rounded-xl p-4 border border-orange-100">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="text-xl font-bold text-orange-600">8 Steps</div>
+              <div className="text-xs text-gray-700">Complete Process</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-green-600">7-14 Days</div>
+              <div className="text-xs text-gray-700">Processing Time</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-blue-600">95%</div>
+              <div className="text-xs text-gray-700">Success Rate</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    
+      {/* Stats Section - Compact */}
+      
+      {/* Services Tabs - Compact */}
+      <section className="max-w-6xl mx-auto px-3 sm:px-4 py-6">
+        <div className="text-center mb-4">
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">
+            Our <span className="text-orange-600">Services</span>
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Comprehensive financial solutions tailored to meet your specific needs
-          </p>
         </div>
 
-        {/* Simple Tabs */}
-        <div className="flex flex-wrap gap-2 justify-center mb-10">
+        {/* Tabs */}
+        <div className="flex flex-wrap gap-1.5 justify-center mb-6">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-3 rounded-lg font-medium transition-all ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
                   : 'bg-white text-gray-700 border border-gray-200 hover:border-orange-300'
               }`}
             >
@@ -595,256 +263,147 @@ function Home() {
           ))}
         </div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Services Grid - Compact */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {activeServices.map((service) => {
             const iconUrl = getCustomIcon(service.id);
-
             return (
               <div
                 key={service.id}
                 onClick={() => navigate(`/loan/${service.id}`)}
-                className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300 cursor-pointer"
+                className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow hover:border-orange-200 transition cursor-pointer"
               >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center flex-shrink-0">
-                    <img src={iconUrl} alt={service.name} className="w-8 h-8 object-contain" />
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
+                    <img src={iconUrl} alt="" className="w-6 h-6 object-contain" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 mb-1">{service.name}</h3>
-                    <p className="text-sm text-gray-500">{service.marathiName}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 text-sm mb-0.5 truncate">{service.name}</h3>
+                    <p className="text-xs text-gray-500 truncate">{service.marathiName}</p>
                   </div>
                 </div>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{service.description}</p>
+                <p className="text-gray-600 text-xs mb-3 line-clamp-2">{service.description}</p>
 
-                {/* Simple Info Badges */}
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-1.5 mb-3">
                   {service.maxAmount && (
-                    <span className="text-xs px-2 py-1 bg-orange-50 text-orange-700 rounded">
+                    <span className="text-xs px-2 py-0.5 bg-orange-50 text-orange-700 rounded">
                       Max: {service.maxAmount}
                     </span>
                   )}
                   {service.tenure && (
-                    <span className="text-xs px-2 py-1 bg-amber-50 text-amber-700 rounded">
-                      Tenure: {service.tenure}
-                    </span>
-                  )}
-                  {service.duration && (
-                    <span className="text-xs px-2 py-1 bg-yellow-50 text-yellow-700 rounded">
-                      {service.duration}
+                    <span className="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 rounded">
+                      {service.tenure}
                     </span>
                   )}
                 </div>
 
                 <button
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-medium hover:shadow-md transition"
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-medium hover:shadow transition"
                   onClick={(e) => { e.stopPropagation(); navigate(`/loan/${service.id}`); }}
                 >
                   View Details
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
             );
           })}
         </div>
-
-        {activeServices.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto rounded-full bg-orange-50 flex items-center justify-center mb-4">
-              <Search className="w-8 h-8 text-orange-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No services found</h3>
-            <p className="text-gray-600">Try searching or browse other categories</p>
-          </div>
-        )}
       </section>
 
-      {/* PDF Forms Download Section - SIMPLE & LINEAR */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-amber-100 px-4 py-2 rounded-full mb-4">
-            <Download className="w-4 h-4 text-orange-600" />
-            <span className="text-sm font-semibold text-orange-700">Download Forms</span>
+      {/* Process Flow - Compact */}
+     
+
+      {/* PDF Forms - Compact */}
+      <section className="max-w-4xl mx-auto px-3 sm:px-4 py-6">
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-1 bg-orange-100 px-3 py-1 rounded-full mb-2">
+            <Download className="w-3 h-3 text-orange-600" />
+            <span className="text-xs font-semibold text-orange-700">Bank Forms</span>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">
-            Ready-to-Use <span className="text-orange-600">Bank Forms</span>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">
+            Download <span className="text-orange-600">Forms</span>
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Download these official bank application forms. Fill and submit directly.
-          </p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="space-y-4">
-            {pdfForms.map((form) => {
-              const Icon = form.icon;
-              return (
-                <div 
-                  key={form.id}
-                  className={`${form.color} border ${form.borderColor} rounded-xl p-5 hover:shadow-md transition-all duration-200`}
+        <div className="space-y-3">
+          {pdfForms.map((form) => (
+            <div key={form.id} className={`${form.color} border ${form.borderColor} rounded-lg p-3`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <FileText className={`w-5 h-5 ${form.textColor}`} />
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-gray-900 text-sm truncate">{form.title}</h3>
+                    <p className="text-xs text-gray-600 truncate">{form.bank}</p>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => handlePdfDownload(form)}
+                  disabled={downloading === form.id}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition ${
+                    downloading === form.id
+                      ? 'bg-orange-100 text-orange-700 cursor-not-allowed'
+                      : 'bg-white text-orange-600 hover:bg-orange-50 border border-orange-200'
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-white/70 flex items-center justify-center">
-                        <FileText className={`w-6 h-6 ${form.textColor}`} />
-                      </div>
-                      <div className="text-left">
-                        <h3 className="font-bold text-gray-900">{form.title}</h3>
-                        <p className="text-sm text-gray-600">{form.bank}</p>
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={() => handlePdfDownload(form)}
-                      disabled={downloading === form.id}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition border ${
-                        downloading === form.id
-                          ? 'bg-orange-100 text-orange-700 border-orange-300 cursor-not-allowed'
-                          : 'bg-white text-orange-600 hover:bg-orange-50 border-orange-200'
-                      }`}
-                    >
-                      {downloading === form.id ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
-                          Downloading...
-                        </>
-                      ) : (
-                        <>
-                          <Download className="w-4 h-4" />
-                          Download PDF
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Enhanced Note Section */}
-          <div className="mt-8 space-y-4">
-            <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-100">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                  <Check className="w-4 h-4 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-700 mb-1">
-                    <span className="font-semibold">Note:</span> All forms are in PDF format. Download, print, fill, and submit directly to the bank.
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    File paths: <code className="bg-white px-1 rounded">/[filename].pdf</code> (stored in public/ folder)
-                  </p>
-                </div>
+                  {downloading === form.id ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-orange-600"></div>
+                      ...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-3 h-3" />
+                      PDF
+                    </>
+                  )}
+                </button>
               </div>
             </div>
+          ))}
+        </div>
 
-            <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-100">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="w-4 h-4 text-red-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-semibold">Important:</span> PDF files are stored in the <code className="bg-white px-1 rounded">public/</code> folder and accessed as <code className="bg-white px-1 rounded">/filename.pdf</code>
-                  </p>
-                  <div className="flex gap-2 mt-2">
-                    <a 
-                      href="tel:9850366753"
-                      className="text-xs px-3 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition"
-                    >
-                      Call for Help
-                    </a>
-                    <button
-                      onClick={() => {
-                        const formNames = pdfForms.map(f => `• ${f.fileName}`).join('\n');
-                        alert(`PDF files available:\n\n${formNames}\n\nAll files are in public/ folder`);
-                      }}
-                      className="text-xs px-3 py-1 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition"
-                    >
-                      View File Names
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Note */}
+        <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-100">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-gray-700">
+              Forms are in PDF format. Call <a href="tel:9850366753" className="font-semibold text-orange-600">9850366753</a> for assistance.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-16">
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-8 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Need Financial Assistance?</h2>
-          <p className="text-orange-100 text-lg mb-8">
-            Our experts are ready to guide you through the process with personalized solutions.
+      {/* CTA - Compact */}
+      <section className="max-w-3xl mx-auto px-3 sm:px-4 py-6">
+        <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-5 text-center text-white">
+          <h2 className="text-xl font-bold mb-2">Need Assistance?</h2>
+          <p className="text-orange-100 text-sm mb-4">
+            Our experts are ready to help you.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
             <Link 
               to="/apply" 
-              className="px-8 py-3 bg-white text-orange-600 font-bold rounded-lg hover:bg-orange-50 transition flex items-center gap-2"
+              className="px-5 py-2 bg-white text-orange-600 font-bold rounded-md hover:bg-orange-50 transition text-sm flex items-center gap-1.5"
             >
               Apply Now
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3 h-3" />
             </Link>
 
             <a 
               href="tel:9850366753"
-              className="px-8 py-3 border-2 border-white/30 text-white font-bold rounded-lg hover:bg-white/10 transition flex items-center gap-2"
+              className="px-5 py-2 border border-white/40 text-white font-bold rounded-md hover:bg-white/10 transition text-sm flex items-center gap-1.5"
             >
-              <Phone className="w-4 h-4" />
-              Call: 9850366753
+              <Phone className="w-3 h-3" />
+              Call Now
             </a>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-6 mt-8">
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              <span>Transparent Process</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              <span>Quick Approvals</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              <span>Local Support</span>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Floating Buttons */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-4">
-        <a
-          href="https://wa.me/919850366753"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition"
-          title="Chat on WhatsApp"
-        >
-          <MessageCircle className="w-6 h-6" />
-        </a>
-
-        <button
-          onClick={() => setShowEmiPopup(true)}
-          className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-105 transition"
-          title="EMI Calculator"
-        >
-          <Calculator className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* EMI Calculator Popup */}
-      <EmiCalculator
-        visible={showEmiPopup}
-        onClose={() => setShowEmiPopup(false)}
-        initialAmount={emiPrefill.amount}
-        initialRate={emiPrefill.rate}
-        initialTenure={emiPrefill.tenure}
-      />
+      {/* Floating buttons & EMI modal moved to App.jsx for global availability */}
     </div>
   );
 }
