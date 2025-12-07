@@ -503,11 +503,13 @@
       "Registration department coordination"
     ],
     "documents": [
-      "Property Documents (मालमत्ता कागदपत्रे)",
-      "Loan Sanction Letter (कर्ज मंजुरी पत्र)",
-      "Identity Proof (ओळख पत्र)",
-      "Address Proof (पत्ता पुरावा)",
-      "Passport Size Photos (पासपोर्ट साईझ फोटो)"
+      "PAN Card",
+      "Aadhaar Card",
+      "Deed of Registration",
+      "Bank Sanction Letter",
+      "Stamp Duty (0.3% on Loan Amount)",
+      "Registration Fees (0.5% — Max ₹15,000)",
+      "Memorandum of Deposit of Title Deeds"
     ],
     "process": [
       "Document preparation and verification",
@@ -534,11 +536,13 @@
       "Legal validity as registered mortgage"
     ],
     "documents": [
-      "Original Title Deeds (मूळ मालकी दस्तऐवज)",
-      "Property Card (मालमत्ता कार्ड)",
-      "7/12 Extract (७/१२ उतारा)",
-      "Loan Agreement (कर्ज करार)",
-      "Memorandum of Deposit (जमा करण्याचा मेमोरंडम)"
+      "PAN Card",
+      "Aadhaar Card",
+      "Deed of Registration",
+      "Bank Sanction Letter",
+      "Stamp Duty (0.3% on Loan Amount)",
+      "Registration Fees (0.5% — Max ₹15,000)",
+      "Memorandum of Deposit of Title Deeds (Draft)"
     ],
     "process": [
       "Title deed verification and validation",

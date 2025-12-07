@@ -145,20 +145,20 @@ function LoanDetails() {
     if (!service) return '';
     
     let documents = [];
-    
-    if (service.category === 'service') {
+    // If the service provides a simple array (services and mortgage entries), return it directly
+    if (service.category === 'service' || service.category === 'mortgage') {
       documents = service.documents || [];
     } else {
       const selectedDocuments = selectedSubtype ? selectedSubtype.documents : service.documents;
-      
+
       if (selectedDocuments?.basicKyc) {
         documents = [...documents, ...selectedDocuments.basicKyc];
       }
-      
+
       if (selectedDocuments?.[applicantType]) {
         documents = [...documents, ...selectedDocuments[applicantType]];
       }
-      
+
       if (selectedDocuments?.property) {
         documents = [...documents, ...selectedDocuments.property];
       }
@@ -190,235 +190,194 @@ function LoanDetails() {
 
   // Generate document list as text for sharing
   const generateDocumentListText = useCallback(() => {
+    // Return plain text without emojis or special symbols
     const documents = getDocumentsList();
     const applicantTypeText = applicantType === 'salaried' ? 'Salaried' : 'Business';
-    
-    let text = `📋 ${service.name} - Required Documents\n\n`;
-    text += `Applicant Type: ${applicantTypeText}\n\n`;
-    
-    if (service.category === 'service') {
-      text += "Documents Required:\n";
+
+    const lines = [];
+    lines.push(service.name || '');
+    if (service.marathiName) lines.push(service.marathiName);
+    lines.push('');
+    lines.push(`Applicant Type: ${applicantTypeText}`);
+    lines.push('');
+
+    if (service.category === 'service' || service.category === 'mortgage') {
+      lines.push('Documents Required:');
       documents.forEach((doc, index) => {
-        text += `${index + 1}. ${doc}\n`;
+        lines.push(`${index + 1}. ${doc}`);
       });
     } else {
       const selectedDocuments = selectedSubtype ? selectedSubtype.documents : service.documents;
-      
+
       if (selectedDocuments?.basicKyc) {
-        text += "📄 Basic KYC Documents:\n";
+        lines.push('Basic KYC Documents:');
         selectedDocuments.basicKyc.forEach((doc, index) => {
-          text += `   ${index + 1}. ${doc}\n`;
+          lines.push(`${index + 1}. ${doc}`);
         });
-        text += "\n";
+        lines.push('');
       }
-      
+
       if (selectedDocuments?.[applicantType]) {
-        text += `💰 ${applicantTypeText} Documents:\n`;
+        lines.push(applicantType === 'salaried' ? 'Income Documents:' : 'Business Documents:');
         selectedDocuments[applicantType].forEach((doc, index) => {
-          text += `   ${index + 1}. ${doc}\n`;
+          lines.push(`${index + 1}. ${doc}`);
         });
-        text += "\n";
+        lines.push('');
       }
-      
+
       if (selectedDocuments?.property) {
-        text += "🏠 Property Documents:\n";
+        lines.push('Property Documents:');
         selectedDocuments.property.forEach((doc, index) => {
-          text += `   ${index + 1}. ${doc}\n`;
+          lines.push(`${index + 1}. ${doc}`);
         });
+        lines.push('');
       }
     }
-    
-    text += `\n---\n📞 Contact: 9850366753\n🏢 Tirupati Agencies`;
-    
-    return text;
+
+    lines.push('Contact: 9850366753');
+    lines.push('Tirupati Agencies');
+
+    return lines.join('\n');
   }, [service, applicantType, selectedSubtype, getDocumentsList]);
 
   // Share document list
   const handleShareDocuments = useCallback(async () => {
     setShareLoading(true);
-    const shareText = generateDocumentListText();
-    
-    const shareData = {
-      title: `${service.name} - Document Checklist`,
-      text: shareText,
-      url: window.location.href,
-    };
+    const plainText = generateDocumentListText();
 
-    if (navigator.share && navigator.canShare?.(shareData)) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          await navigator.clipboard.writeText(shareText);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
+    try {
+      // Prefer Web Share API for mobile/native share; share text only (no URL)
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `${service.name} - Document Checklist`,
+            text: plainText,
+          });
+          setShareLoading(false);
+          return;
+        } catch (err) {
+          // fall through to clipboard fallback
+          console.warn('Web share failed or cancelled', err);
         }
       }
-    } else {
-      await navigator.clipboard.writeText(shareText);
+
+      // Fallback: copy to clipboard and notify user
+      await navigator.clipboard.writeText(plainText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Share fallback failed', err);
     }
-    
+
     setShareLoading(false);
   }, [generateDocumentListText, service]);
 
   // Download PDF with document list
   const handleDownloadPDF = useCallback(async () => {
     setPdfLoading(true);
-    
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(() => {
-        generatePDF();
+    try {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(async () => {
+          await generatePDF();
+          setPdfLoading(false);
+        }, { timeout: 1000 });
+      } else {
+        await generatePDF();
         setPdfLoading(false);
-      }, { timeout: 1000 });
-    } else {
-      setTimeout(() => {
-        generatePDF();
-        setPdfLoading(false);
-      }, 0);
+      }
+    } catch (err) {
+      console.error('PDF generation failed', err);
+      setPdfLoading(false);
     }
   }, [service, applicantType, selectedSubtype]);
 
-  const generatePDF = () => {
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const margin = 40;
-    let y = 60;
-    const pageWidth = doc.internal.pageSize.width;
+  // Helper: load image and return dataURL + dimensions (or null)
+  const loadImageData = (url) => new Promise((resolve) => {
+    if (!url) return resolve(null);
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          resolve({ dataUrl, width: img.naturalWidth, height: img.naturalHeight });
+        } catch (e) {
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = url;
+    } catch (e) { resolve(null); }
+  });
 
-    // Header
-    doc.setFillColor(249, 115, 22, 0.1);
-    doc.rect(0, 0, pageWidth, 60, 'F');
-    
-    doc.setFontSize(16);
-    doc.setTextColor(249, 115, 22);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Tirupati Agencies', margin, 35);
-    
-    doc.setFontSize(9);
-    doc.setTextColor(99, 102, 106);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Trusted Financial & Property Services', margin, 48);
-    
-    y = 80;
+  const generatePDF = async () => {
+    // Generate plain text checklist and trigger download as .txt
+    try {
+      const lines = [];
+      lines.push(service.name || '');
+      if (service.marathiName) lines.push(service.marathiName);
+      lines.push('');
+      lines.push(`Applicant Type: ${applicantType === 'salaried' ? 'Salaried' : 'Business'}`);
+      lines.push('');
+      lines.push('Document Checklist');
+      lines.push('');
 
-    // Service Title
-    doc.setFontSize(13);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(33, 37, 41);
-    doc.text(service.name, margin, y);
-    y += 15;
+      if (service.category === 'service' || service.category === 'mortgage') {
+        const documents = getDocumentsList();
+        documents.forEach((docItem, idx) => {
+          lines.push(`${idx + 1}. ${docItem}`);
+        });
+      } else {
+        const selectedDocuments = selectedSubtype ? selectedSubtype.documents : service.documents;
 
-    if (service.marathiName) {
-      doc.setFontSize(9);
-      doc.setTextColor(99, 102, 106);
-      doc.text(service.marathiName, margin, y);
-      y += 20;
+        if (selectedDocuments?.basicKyc) {
+          lines.push('Basic KYC Documents');
+          selectedDocuments.basicKyc.forEach((docItem, idx) => {
+            lines.push(`${idx + 1}. ${docItem}`);
+          });
+          lines.push('');
+        }
+
+        if (selectedDocuments?.[applicantType]) {
+          lines.push(applicantType === 'salaried' ? 'Income Documents' : 'Business Documents');
+          selectedDocuments[applicantType].forEach((docItem, idx) => {
+            lines.push(`${idx + 1}. ${docItem}`);
+          });
+          lines.push('');
+        }
+
+        if (selectedDocuments?.property) {
+          lines.push('Property Documents');
+          selectedDocuments.property.forEach((docItem, idx) => {
+            lines.push(`${idx + 1}. ${docItem}`);
+          });
+          lines.push('');
+        }
+      }
+
+      lines.push('Contact: 9850366753');
+      lines.push('Tirupati Agencies');
+
+      const text = lines.join('\n');
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const filename = `${(service.name || 'document').replace(/\s+/g, '_')}_documents.txt`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Plain text download failed', e);
+      throw e;
     }
-
-    // Document Checklist Header
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(33, 37, 41);
-    doc.text('📋 Document Checklist', margin, y);
-    y += 20;
-
-    // Applicant Type
-    doc.setFontSize(10);
-    doc.setTextColor(66, 66, 66);
-    doc.text(`Applicant Type: ${applicantType === 'salaried' ? 'Salaried' : 'Business'}`, margin, y);
-    y += 15;
-
-    // Documents List
-    const documents = getDocumentsList();
-    
-    if (service.category === 'service') {
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Required Documents:', margin, y);
-      y += 15;
-      
-      doc.setFont('helvetica', 'normal');
-      documents.forEach((docItem, index) => {
-        if (y > 700) {
-          doc.addPage();
-          y = 40;
-        }
-        doc.text(`${index + 1}. ${docItem}`, margin + 10, y);
-        y += 12;
-      });
-    } else {
-      const selectedDocuments = selectedSubtype ? selectedSubtype.documents : service.documents;
-      
-      if (selectedDocuments?.basicKyc) {
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Basic KYC Documents:', margin, y);
-        y += 15;
-        
-        doc.setFont('helvetica', 'normal');
-        selectedDocuments.basicKyc.forEach((docItem, index) => {
-          if (y > 700) {
-            doc.addPage();
-            y = 40;
-          }
-          doc.text(`${index + 1}. ${docItem}`, margin + 10, y);
-          y += 12;
-        });
-        y += 5;
-      }
-      
-      if (selectedDocuments?.[applicantType]) {
-        if (y > 700) {
-          doc.addPage();
-          y = 40;
-        }
-        doc.setFont('helvetica', 'bold');
-        doc.text(`${applicantType === 'salaried' ? 'Income' : 'Business'} Documents:`, margin, y);
-        y += 15;
-        
-        doc.setFont('helvetica', 'normal');
-        selectedDocuments[applicantType].forEach((docItem, index) => {
-          if (y > 700) {
-            doc.addPage();
-            y = 40;
-          }
-          doc.text(`${index + 1}. ${docItem}`, margin + 10, y);
-          y += 12;
-        });
-        y += 5;
-      }
-      
-      if (selectedDocuments?.property) {
-        if (y > 700) {
-          doc.addPage();
-          y = 40;
-        }
-        doc.setFont('helvetica', 'bold');
-        doc.text('Property Documents:', margin, y);
-        y += 15;
-        
-        doc.setFont('helvetica', 'normal');
-        selectedDocuments.property.forEach((docItem, index) => {
-          if (y > 700) {
-            doc.addPage();
-            y = 40;
-          }
-          doc.text(`${index + 1}. ${docItem}`, margin + 10, y);
-          y += 12;
-        });
-      }
-    }
-
-    // Footer
-    const pageHeight = doc.internal.pageSize.height;
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Generated on ${new Date().toLocaleDateString()} - Tirupati Agencies`, margin, pageHeight - 20);
-    doc.text('Contact: 9850366753', pageWidth - margin - 80, pageHeight - 20);
-
-    const filename = `${service.name.replace(/\s+/g, '_')}_documents.pdf`;
-    doc.save(filename);
   };
 
   // Memoized quick stats
@@ -453,16 +412,61 @@ function LoanDetails() {
   const renderDocuments = useMemo(() => {
     if (!service) return null;
 
-    if (service.category === 'service') {
+    // Render simple array-style documents for 'service' and 'mortgage' categories
+    if (service.category === 'service' || service.category === 'mortgage') {
       return (
-        <div className="space-y-2">
-          {service.documents?.map((doc, index) => (
-            <div key={index} className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100">
-              <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-700">{doc}</span>
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="space-y-2">
+            {service.documents?.map((doc, index) => (
+              <div key={index} className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100">
+                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                <span className="text-sm text-gray-700">{doc}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Document Actions for simple lists (service / mortgage) */}
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <button
+              onClick={handleDownloadPDF}
+              disabled={pdfLoading}
+              className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:shadow transition text-sm ${
+                pdfLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {pdfLoading ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <FileDown className="w-4 h-4" />
+                  Download Checklist (Text)
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleShareDocuments}
+              disabled={shareLoading}
+              className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-orange-500 text-orange-600 font-medium hover:bg-orange-50 transition text-sm ${
+                shareLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {shareLoading ? (
+                <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : copied ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4" />
+                  Share List
+                </>
+              )}
+            </button>
+          </div>
+        </>
       );
     }
 
@@ -557,7 +561,7 @@ function LoanDetails() {
             ) : (
               <>
                 <FileDown className="w-4 h-4" />
-                Download PDF
+                Download Checklist (Text)
               </>
             )}
           </button>

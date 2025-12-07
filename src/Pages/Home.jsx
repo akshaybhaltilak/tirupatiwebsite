@@ -239,7 +239,7 @@ function Home() {
       {/* Stats Section - Compact */}
       
       {/* Services Tabs - Compact */}
-      <section className="max-w-6xl mx-auto px-3 sm:px-4 py-6">
+      <section id="services" className="max-w-6xl mx-auto px-3 sm:px-4 py-6">
         <div className="text-center mb-4">
           <h2 className="text-2xl font-bold text-gray-900 mb-1">
             Our <span className="text-orange-600">Services</span>

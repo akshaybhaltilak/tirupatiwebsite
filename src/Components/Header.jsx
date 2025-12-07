@@ -107,8 +107,8 @@ function Header() {
             <Link
               to="/"
               className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${isScrolled
-                  ? 'text-gray-50 hover:bg-orange-50'
-                  : 'text-gray-50 hover:bg-white/50'
+                  ? 'text-gray-700 hover:bg-orange-50'
+                  : 'text-gray-700 hover:bg-white/50'
                 }`}
             >
               <HomeIcon className="w-4 h-4" />
@@ -116,12 +116,7 @@ function Header() {
             </Link>
 
             {/* About Button (desktop) */}
-            <Link
-              to="/about"
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${isScrolled ? 'text-gray-700 hover:bg-orange-50 hover:text-orange-600' : 'text-orange-600 hover:bg-white/50'}`}
-            >
-              About
-            </Link>
+           
 
             {/* Dropdown 1 - Loans */}
             <div className="relative">
@@ -286,6 +281,12 @@ function Header() {
                 </div>
               )}
             </div>
+             <Link
+              to="/about"
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${isScrolled ? 'text-gray-700 hover:bg-orange-50 hover:text-orange-600' : 'text-orange-600 hover:bg-white/50'}`}
+            >
+              About
+            </Link>
 
             {/* Contact Info */}
             <div className="flex items-center gap-3">
