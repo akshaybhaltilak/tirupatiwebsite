@@ -216,7 +216,8 @@ const BannerSlider = ({ services = [], autoChangeInterval = 8000 }) => {
 
   const currentService = enhancedServices[currentSlide] || enhancedServices[0];
   const currentProcessSteps = processSteps[currentService?.processType] || [];
-  const displayedProcessSteps = currentProcessSteps.slice(0, isMobile ? 4 : 8);
+  // Always show up to 8 steps so mobile and desktop display the same content
+  const displayedProcessSteps = currentProcessSteps.slice(0, 8);
 
   return (
     <div 
@@ -298,8 +299,8 @@ const BannerSlider = ({ services = [], autoChangeInterval = 8000 }) => {
 
               {/* Right Column - Conditional Content */}
               <div className={`flex flex-col gap-3 ${isMobile ? 'mt-4' : ''}`}>
-                {/* Show Process Steps only for loan and other services */}
-                {!isMobile && currentService.showProcess && currentProcessSteps.length > 0 ? (
+                {/* Show Process Steps for services that have process steps (desktop & mobile) */}
+                {currentService.showProcess && currentProcessSteps.length > 0 ? (
                   <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -316,8 +317,8 @@ const BannerSlider = ({ services = [], autoChangeInterval = 8000 }) => {
                       </div>
                     </div>
 
-                    {/* Process Steps - Compact Grid */}
-                    <div className="grid grid-cols-4 gap-2">
+                    {/* Process Steps - Compact Grid (responsive) */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {displayedProcessSteps.map((step) => (
                         <div 
                           key={step.id}
