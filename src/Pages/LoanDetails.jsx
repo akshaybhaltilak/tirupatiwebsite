@@ -1,53 +1,38 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  Download,
-  Share2,
-  Home,
-  Building,
-  GraduationCap,
-  Briefcase,
-  Settings,
-  User,
-  FileSearch,
-  BarChart,
-  FileCheck,
-  Phone,
-  FileText,
-  CheckCircle,
   ArrowLeft,
-  Building2,
-  School,
-  Factory,
-  Stethoscope,
-  Calculator,
-  MapPin,
-  Landmark,
-  Banknote,
-  TrendingUp,
-  Clock,
-  Percent,
-  Shield,
-  Users,
-  Zap,
-  Star,
-  Award,
-  ChevronRight,
-  Copy,
-  FileDown
+FileDown,
+Share2,
+FileSearch,
+CheckCircle,
+FileText,
+User,
+TrendingUp,
+Building,
+GraduationCap,
+Briefcase,
+MapPin,
+Phone,
+Settings,
+Home,
+BarChart,
+FileCheck,
+Building2,
+School,
+Factory,
+Stethoscope,
+Calculator,
+Landmark,
+Banknote,
+Clock,
+Percent,
+Shield,
+Users,
+Zap
 } from 'lucide-react';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import loanDetails from '../data/loanDetails.json';
-
-// Preload images function
-const preloadImage = (src) => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.src = src;
-    img.onload = resolve;
-    img.onerror = reject;
-  });
-};
 
 function LoanDetails() {
   const { loanId } = useParams();
@@ -59,50 +44,36 @@ function LoanDetails() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const service = loanDetails[loanId];
   const pageRef = useRef();
+  const service = loanDetails[loanId];
 
-  // Optimized image mapping
-  const imageMap = useMemo(() => ({
-    'flat-purchase': "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_1_afuhwt.jpg",
-    'flat': "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_1_afuhwt.jpg",
-    'apartment': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'house-purchase': "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_rbqnet.jpg",
-    'house': "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_rbqnet.jpg",
-    'construction-loan': "https://homefirstindia.com/app/uploads/2020/09/construction-2.jpg",
-    'construction': "https://homefirstindia.com/app/uploads/2020/09/construction-2.jpg",
-    'plot-purchase': "https://images.unsplash.com/photo-1448630360428-65456885c650?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'land': "https://images.unsplash.com/photo-1448630360428-65456885c650?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'renovation': "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'education': "https://www.i2ifunding.com/assets/bank-education-loan.jpg",
-    'business': "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'doctor': "https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'machine': "https://images.unsplash.com/photo-1494412685616-a5d310fbb07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'loan-against-property': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'mortgage': "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'personal': "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'service': "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
-    'default': "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70"
-  }), []);
-
-  // Check mobile on mount and resize
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Get loan image with memoization
+  // Compute loan image based on service id/name
   const loanImage = useMemo(() => {
     if (!service) return '';
-    
-    const serviceId = service.id.toLowerCase();
-    const serviceName = service.name.toLowerCase();
+    const imageMap = {
+      'flat-purchase': "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_1_afuhwt.jpg",
+      'flat': "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_1_afuhwt.jpg",
+      'apartment': "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'house-purchase': "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_rbqnet.jpg",
+      'house': "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.01_rbqnet.jpg",
+      'construction-loan': "https://homefirstindia.com/app/uploads/2020/09/construction-2.jpg",
+      'construction': "https://homefirstindia.com/app/uploads/2020/09/construction-2.jpg",
+      'plot-purchase': "https://images.unsplash.com/photo-1448630360428-65456885c650?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'land': "https://images.unsplash.com/photo-1448630360428-65456885c650?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'renovation': "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'education': "https://www.i2ifunding.com/assets/bank-education-loan.jpg",
+      'business': "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'doctor': "https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'machine': "https://images.unsplash.com/photo-1494412685616-a5d310fbb07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'loan-against-property': "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'mortgage': "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'personal': "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'service': "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70",
+      'default': "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70"
+    };
+
+    const serviceId = (service.id || '').toLowerCase();
+    const serviceName = (service.name || '').toLowerCase();
 
     for (const [key, image] of Object.entries(imageMap)) {
       if (serviceId.includes(key)) return image;
@@ -117,7 +88,16 @@ function LoanDetails() {
     if (service.category === 'service') return imageMap['service'];
 
     return imageMap['default'];
-  }, [service, imageMap]);
+  }, [service]);
+
+  const preloadImage = (url) => new Promise((resolve) => {
+    if (!url) return resolve(null);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(null);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
 
   // Preload image
   useEffect(() => {
@@ -316,66 +296,114 @@ function LoanDetails() {
   });
 
   const generatePDF = async () => {
-    // Generate plain text checklist and trigger download as .txt
     try {
-      const lines = [];
-      lines.push(service.name || '');
-      if (service.marathiName) lines.push(service.marathiName);
-      lines.push('');
-      lines.push(`Applicant Type: ${applicantType === 'salaried' ? 'Salaried' : 'Business'}`);
-      lines.push('');
-      lines.push('Document Checklist');
-      lines.push('');
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const margin = 40;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const usableWidth = pageWidth - margin * 2;
+      const baseFontSize = 12;
+      let y = margin;
+
+      const cleanEnglish = (input = '') => {
+        if (!input) return '';
+        let s = String(input).normalize('NFC');
+        s = s.replace(/[\u0000-\u001F\u007F]/g, '');
+        s = s.replace(/\s+/g, ' ').trim();
+        // remove Devanagari block
+        s = s.replace(/[\u0900-\u097F]/g, '');
+        return s.trim();
+      };
+
+      const renderText = (text, opts = {}) => {
+        const fontSize = opts.fontSize || baseFontSize;
+        doc.setFontSize(fontSize);
+        const indent = opts.indent || 0;
+        const lines = doc.splitTextToSize(String(text), usableWidth - indent);
+        doc.text(lines, margin + indent, y);
+        y += lines.length * (fontSize + 4);
+      };
+
+      // optional logo
+      try {
+        if (loanImage) {
+          const img = await loadImageData(loanImage);
+          if (img?.dataUrl) {
+            const maxH = 40;
+            const scale = Math.min(80 / img.width, maxH / img.height, 1);
+            doc.addImage(img.dataUrl, 'JPEG', margin, y, img.width * scale, img.height * scale);
+          }
+        }
+      } catch (e) {}
+
+      const title = cleanEnglish(service?.name || '');
+      doc.setFontSize(16);
+      if (title) doc.text(title, margin + 90, y + 12);
+      doc.setFontSize(10);
+      const dateStr = new Date().toLocaleDateString();
+      doc.text(`Date: ${dateStr}`, pageWidth - margin - doc.getTextWidth(`Date: ${dateStr}`), y + 12);
+      y += 56;
+
+      // banner title
+      doc.setDrawColor(220);
+      doc.setFillColor(248, 248, 248);
+      doc.roundedRect(margin, y, usableWidth, 36, 6, 6, 'F');
+      doc.setFontSize(13);
+      doc.setTextColor(34, 34, 34);
+      doc.text('Document Checklist', margin + 12, y + 24);
+      y += 48;
+
+      renderText(`Applicant Type: ${applicantType === 'salaried' ? 'Salaried' : 'Business'}`, { fontSize: 11 });
+      y += 6;
+
+      const writeChecklist = (items = []) => {
+        items.forEach((it, idx) => {
+          const text = cleanEnglish(it || '');
+          if (!text) return;
+          if (y + 30 > pageHeight - margin - 30) {
+            addFooter();
+            doc.addPage();
+            y = margin;
+          }
+
+          const boxSize = 10;
+          doc.setDrawColor(150);
+          doc.rect(margin + 4, y - 8, boxSize, boxSize);
+          renderText(`${idx + 1}. ${text}`, { indent: boxSize + 12, fontSize: 11 });
+          y += 6;
+        });
+      };
 
       if (service.category === 'service' || service.category === 'mortgage') {
-        const documents = getDocumentsList();
-        documents.forEach((docItem, idx) => {
-          lines.push(`${idx + 1}. ${docItem}`);
-        });
+        renderText('Documents Required:', { fontSize: 12 });
+        y += 6;
+        writeChecklist(getDocumentsList());
       } else {
-        const selectedDocuments = selectedSubtype ? selectedSubtype.documents : service.documents;
-
-        if (selectedDocuments?.basicKyc) {
-          lines.push('Basic KYC Documents');
-          selectedDocuments.basicKyc.forEach((docItem, idx) => {
-            lines.push(`${idx + 1}. ${docItem}`);
-          });
-          lines.push('');
-        }
-
-        if (selectedDocuments?.[applicantType]) {
-          lines.push(applicantType === 'salaried' ? 'Income Documents' : 'Business Documents');
-          selectedDocuments[applicantType].forEach((docItem, idx) => {
-            lines.push(`${idx + 1}. ${docItem}`);
-          });
-          lines.push('');
-        }
-
-        if (selectedDocuments?.property) {
-          lines.push('Property Documents');
-          selectedDocuments.property.forEach((docItem, idx) => {
-            lines.push(`${idx + 1}. ${docItem}`);
-          });
-          lines.push('');
-        }
+        const sel = selectedSubtype ? selectedSubtype.documents : service.documents;
+        if (sel?.basicKyc) { renderText('Basic KYC Documents:', { fontSize: 12 }); y += 4; writeChecklist(sel.basicKyc); y += 4; }
+        if (sel?.[applicantType]) { renderText(applicantType === 'salaried' ? 'Income Documents:' : 'Business Documents:', { fontSize: 12 }); y += 4; writeChecklist(sel[applicantType]); y += 4; }
+        if (sel?.property) { renderText('Property Documents:', { fontSize: 12 }); y += 4; writeChecklist(sel.property); y += 4; }
       }
 
-      lines.push('Contact: 9850366753');
-      lines.push('Tirupati Agencies');
+      const addFooter = () => {
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          const bottomY = pageHeight - 28;
+          doc.setFontSize(9);
+          doc.setTextColor(120);
+          doc.text('Tirupati Agencies • Contact: 9850366753', margin, bottomY);
+          const pageLabel = `Page ${i} of ${pageCount}`;
+          doc.text(pageLabel, pageWidth - margin - doc.getTextWidth(pageLabel), bottomY);
+        }
+        doc.setPage(doc.internal.getNumberOfPages());
+      };
 
-      const text = lines.join('\n');
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const filename = `${(service.name || 'document').replace(/\s+/g, '_')}_documents.txt`;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      addFooter();
+      const filename = `${(service.name || 'document').replace(/\s+/g, '_')}_documents.pdf`;
+      doc.save(filename);
     } catch (e) {
-      console.error('Plain text download failed', e);
+      console.error('PDF generation failed', e);
       throw e;
     }
   };

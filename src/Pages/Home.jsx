@@ -326,52 +326,8 @@ function Home() {
           </h2>
         </div>
 
-        <div className="space-y-3">
-          {pdfForms.map((form) => (
-            <div key={form.id} className={`${form.color} border ${form.borderColor} rounded-lg p-3`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <FileText className={`w-5 h-5 ${form.textColor}`} />
-                  <div className="min-w-0">
-                    <h3 className="font-bold text-gray-900 text-sm truncate">{form.title}</h3>
-                    <p className="text-xs text-gray-600 truncate">{form.bank}</p>
-                  </div>
-                </div>
-                
-                <button
-                  onClick={() => handlePdfDownload(form)}
-                  disabled={downloading === form.id}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition ${
-                    downloading === form.id
-                      ? 'bg-orange-100 text-orange-700 cursor-not-allowed'
-                      : 'bg-white text-orange-600 hover:bg-orange-50 border border-orange-200'
-                  }`}
-                >
-                  {downloading === form.id ? (
-                    <>
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-orange-600"></div>
-                      ...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-3 h-3" />
-                      PDF
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Note */}
-        <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-100">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-gray-700">
-              Forms are in PDF format. Call <a href="tel:9850366753" className="font-semibold text-orange-600">9850366753</a> for assistance.
-            </p>
-          </div>
+        <div className="text-center">
+          <p className="text-sm text-gray-600">Downloadable bank forms have been moved to the <span className="text-orange-600 font-medium"><a href="/forms">Forms</a></span> page.</p>
         </div>
       </section>
 

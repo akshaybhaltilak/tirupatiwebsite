@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './Pages/Home';
 import LoanDetails from './Pages/LoanDetails';
+import Forms from './Pages/Forms';
 import Apply from './Pages/Apply';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
@@ -23,6 +24,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/loan/:loanId" element={<LoanDetails />} />
+          <Route path="/forms" element={<Forms />} />
           <Route path="/apply" element={<Apply />} />
           <Route path="/about" element={<About />} />
         </Routes>

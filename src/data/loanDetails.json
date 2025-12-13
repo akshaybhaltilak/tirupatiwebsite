@@ -554,6 +554,35 @@
     "duration": "2-3 working days",
     "cost": "Starting from ₹5,000"
   },
+  "leave-license": {
+    "id": "leave-license",
+    "name": "Leave and License Agreement",
+    "marathiName": "लीव्ह अँड लायसन्स करार",
+    "icon": "FileText",
+    "description": "Professional leave and license agreement drafting and registration for rental properties.",
+    "category": "mortgage",
+    "benefits": [
+      "Legal rental agreement",
+      "Stamp duty payment",
+      "Registration compliance",
+      "Tenant verification"
+    ],
+    "documents": [
+      "Owner Identity Proof (मालक ओळख पत्र)",
+      "Tenant Identity Proof (भाडेकरू ओळख पत्र)",
+      "Property Documents (मालमत्ता कागदपत्रे)",
+      "Address Proof (पत्ता पुरावा)"
+    ],
+    "process": [
+      "Document verification",
+      "Agreement drafting",
+      "Stamp paper purchase",
+      "Registration appointment",
+      "Agreement execution and registration"
+    ],
+    "duration": "3-5 working days",
+    "cost": "Starting from ₹3,000 + Government Charges"
+  },
 
   "search-report": {
     "id": "search-report",
@@ -792,35 +821,7 @@
     ],
     "duration": "7-10 working days",
     "cost": "Starting from ₹2,500"
-  },
-
-  "leave-license": {
-    "id": "leave-license",
-    "name": "Leave and License Agreement",
-    "marathiName": "लीव्ह अँड लायसन्स करार",
-    "icon": "FileText",
-    "description": "Professional leave and license agreement drafting and registration for rental properties.",
-    "category": "service",
-    "benefits": [
-      "Legal rental agreement",
-      "Stamp duty payment",
-      "Registration compliance",
-      "Tenant verification"
-    ],
-    "documents": [
-      "Owner Identity Proof (मालक ओळख पत्र)",
-      "Tenant Identity Proof (भाडेकरू ओळख पत्र)",
-      "Property Documents (मालमत्ता कागदपत्रे)",
-      "Address Proof (पत्ता पुरावा)"
-    ],
-    "process": [
-      "Document verification",
-      "Agreement drafting",
-      "Stamp paper purchase",
-      "Registration appointment",
-      "Agreement execution and registration"
-    ],
-    "duration": "3-5 working days",
-    "cost": "Starting from ₹3,000 + Government Charges"
   }
+
+  
 }

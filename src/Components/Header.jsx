@@ -287,6 +287,12 @@ function Header() {
             >
               About
             </Link>
+            <Link
+              to="/forms"
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${isScrolled ? 'text-gray-700 hover:bg-orange-50 hover:text-orange-600' : 'text-orange-600 hover:bg-white/50'}`}
+            >
+              Forms
+            </Link>
 
             {/* Contact Info */}
             <div className="flex items-center gap-3">
@@ -352,6 +358,16 @@ function Header() {
             >
               <FileText className="w-5 h-5" />
               <span>About</span>
+            </Link>
+
+            {/* Forms (mobile) */}
+            <Link
+              to="/forms"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-gray-700 font-medium"
+              onClick={() => setOpenMenu(false)}
+            >
+              <FileText className="w-5 h-5" />
+              <span>Forms</span>
             </Link>
 
             {/* Loans */}

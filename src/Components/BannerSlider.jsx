@@ -77,17 +77,13 @@ const BannerSlider = ({ services = [], autoChangeInterval = 8000 }) => {
       shortDescription: "Lowest interest rates with quick approval",
       icon: Home,
       features: [
-        "Interest from 8.5%",
+        "Low interest rates",
         "Quick approval",
         "30 years tenure",
         "Balance transfer",
         "Pre-approved offers"
       ],
-      stats: [
-        { label: "Success", value: "100%" },
-        { label: "Time", value: "7 Days" },
-        { label: "Cities", value: "50+" }
-      ],
+     
       processType: "loan",
       color: "from-blue-600 to-indigo-600",
       imageUrl: "https://res.cloudinary.com/dvtnm3d8k/image/upload/q_auto,f_auto/v1764731098/WhatsApp_Image_2025-12-02_at_17.48.02_pdvzrg.jpg",
@@ -109,11 +105,7 @@ const BannerSlider = ({ services = [], autoChangeInterval = 8000 }) => {
         "Valuation services",
         "EMI calculation"
       ],
-      stats: [
-        { label: "Success", value: "100%" },
-        { label: "Time", value: "15 Days" },
-        { label: "Cities", value: "50+" }
-      ],
+     
       processType: "mortgage",
       color: "from-green-600 to-teal-600",
       imageUrl: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
@@ -135,11 +127,7 @@ const BannerSlider = ({ services = [], autoChangeInterval = 8000 }) => {
         "Tax Planning",
         "Retirement Plans"
       ],
-      stats: [
-        { label: "Services", value: "25+" },
-        { label: "Clients", value: "10K+" },
-        { label: "Cities", value: "100+" }
-      ],
+    
       processType: "other",
       color: "from-purple-600 to-pink-600",
       imageUrl: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=70",
